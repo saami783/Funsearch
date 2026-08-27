@@ -17,11 +17,11 @@
 from collections.abc import Sequence
 from typing import Any
 
-from funsearch.implementation import code_manipulation
-from funsearch.implementation import config as config_lib
-from funsearch.implementation import evaluator
-from funsearch.implementation import programs_database
-from funsearch.implementation import sampler
+from conjectures_refutation.refutation_heuristics.funsearch.implementation import code_manipulation
+from conjectures_refutation.refutation_heuristics.funsearch.implementation import config as config_lib
+from conjectures_refutation.refutation_heuristics.funsearch.implementation import evaluator
+from conjectures_refutation.refutation_heuristics.funsearch.implementation import programs_database
+from conjectures_refutation.refutation_heuristics.funsearch.implementation import sampler
 
 
 def _extract_function_names(specification: str) -> tuple[str, str]:

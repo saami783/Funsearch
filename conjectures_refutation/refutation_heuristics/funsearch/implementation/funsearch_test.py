@@ -16,7 +16,7 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from funsearch.implementation import funsearch
+from conjectures_refutation.refutation_heuristics.funsearch.implementation import funsearch
 
 _PY_PROMPT = '''\
 import itertools
