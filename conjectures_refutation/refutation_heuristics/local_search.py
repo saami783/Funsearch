@@ -51,7 +51,7 @@ from conjectures_refutation.helpers.utility import (
     mutation_replace_vertex_by_clique,
     mutation_replace_vertex_by_polyhedral,
     mutation_bipartition_neighborhood,
-    ConjectureResult,
+    ConjectureResult, MutationFunction, MUTATION_REGISTRY,
 )
 from conjectures_refutation.helpers import invariants, scores_function
 
@@ -103,26 +103,6 @@ class SearchOutcome:
     evaluations_eligible: int
     resets: int
     subclass_name: Optional[str] = None
-
-
-MutationFunction = Callable[[nx.Graph], nx.Graph]
-
-
-MUTATION_REGISTRY: Dict[str, MutationFunction] = {
-    "add_edge": mutation_add_edge,
-    "remove_edge": mutation_remove_edge,
-    "add_vertex": mutation_add_vertex,
-    "remove_vertex": mutation_remove_vertex,
-    "subdivision": mutation_subdivision,
-    "contraction": mutation_contraction,
-    "replace_vertex_by_path": mutation_replace_vertex_by_path,
-    "replace_vertex_by_star": mutation_replace_vertex_by_star,
-    "replace_vertex_by_clique": mutation_replace_vertex_by_clique,
-    "replace_vertex_by_polyhedral": mutation_replace_vertex_by_polyhedral,
-    "bipartition_neighborhood": mutation_bipartition_neighborhood,
-}
-
-DEFAULT_MUTATION_NAMES: Tuple[str, ...] = tuple(MUTATION_REGISTRY.keys())
 
 
 def resolve_mutation_functions(names: Sequence[str]) -> Tuple[MutationFunction, ...]:

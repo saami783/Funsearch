@@ -7,7 +7,7 @@ import csv
 import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Callable
 
 import networkx as nx
 import numpy as np
@@ -768,6 +768,25 @@ def generate_random_graph(
         graph = repair_graph(graph)
     return graph
 
+
+MutationFunction = Callable[[nx.Graph], nx.Graph]
+
+
+MUTATION_REGISTRY: Dict[str, MutationFunction] = {
+    "add_edge": mutation_add_edge,
+    "remove_edge": mutation_remove_edge,
+    "add_vertex": mutation_add_vertex,
+    "remove_vertex": mutation_remove_vertex,
+    "subdivision": mutation_subdivision,
+    "contraction": mutation_contraction,
+    "replace_vertex_by_path": mutation_replace_vertex_by_path,
+    "replace_vertex_by_star": mutation_replace_vertex_by_star,
+    "replace_vertex_by_clique": mutation_replace_vertex_by_clique,
+    "replace_vertex_by_polyhedral": mutation_replace_vertex_by_polyhedral,
+    "bipartition_neighborhood": mutation_bipartition_neighborhood,
+}
+
+DEFAULT_MUTATION_NAMES: Tuple[str, ...] = tuple(MUTATION_REGISTRY.keys())
 
 __all__ = [
     "Conjecture",
