@@ -1,64 +1,111 @@
 from dataclasses import dataclass
-from random import randint
-from typing import Optional, Tuple, Callable
+from typing import Optional, Tuple, Callable, Dict
 import networkx as nx
+import numpy as np
 
-from conjectures_refutation.helpers.utility import MUTATION_REGISTRY, generate_init_graph
+
+def mutation_add_edge(G: nx.Graph) -> nx.Graph:
+    return G
+
+def mutation_remove_edge(G: nx.Graph) -> nx.Graph:
+    return G
+
+def mutation_add_vertex(G: nx.Graph) -> nx.Graph:
+    return G
+
+def mutation_remove_vertex(G: nx.Graph) -> nx.Graph:
+    return G
+
+def mutation_subdivision(G: nx.Graph) -> nx.Graph:
+    return G
+
+def mutation_contraction(G: nx.Graph) -> nx.Graph:
+    return G
+
+def mutation_replace_vertex_by_path(G: nx.Graph) -> nx.Graph:
+    return G
+
+def mutation_replace_vertex_by_star(G: nx.Graph) -> nx.Graph:
+    return G
+
+def mutation_replace_vertex_by_clique(G: nx.Graph) -> nx.Graph:
+    return G
+
+def mutation_replace_vertex_by_polyhedral(G: nx.Graph) -> nx.Graph:
+    return G
+
+def mutation_bipartition_neighborhood(G: nx.Graph) -> nx.Graph:
+    return G
+
+FunSearchMutationFunction = Callable[[nx.Graph], nx.Graph]
+
+MUTATION_REGISTRY: Dict[str, FunSearchMutationFunction] = {
+    "add_edge": mutation_add_edge,
+    "remove_edge": mutation_remove_edge,
+    "add_vertex": mutation_add_vertex,
+    "remove_vertex": mutation_remove_vertex,
+    "subdivision": mutation_subdivision,
+    "contraction": mutation_contraction,
+    "replace_vertex_by_path": mutation_replace_vertex_by_path,
+    "replace_vertex_by_star": mutation_replace_vertex_by_star,
+    "replace_vertex_by_clique": mutation_replace_vertex_by_clique,
+    "replace_vertex_by_polyhedral": mutation_replace_vertex_by_polyhedral,
+    "bipartition_neighborhood": mutation_bipartition_neighborhood,
+}
 
 
 # @funsearch.run
-def evaluate(min_size: int, max_size: int, score_fn: Callable) -> Optional[float]:
+def evaluate(current_size: int, min_size: int, max_size: int, score_fn: Callable) -> Optional[float]:
     print("[DEBUG] : Nous sommes dans la fonction evuluate()")
 
-    G = solve(min_size, max_size)
+    G = solve(current_size)
 
     score = score_fn(G, min_size, max_size)
 
-    return float(score)
+    return float(-score)
 
 
-def solve(min_size: int, max_size: int, graphs_per_mutation: int | None = None, num_steps: int = 100) -> nx.Graph:
-    print("[DEBUG] : Nous sommes dans la fonction solve()")
-    G = generate_init_graph(min_size, max_size)
+def solve(size: int, max_steps: int = 500) -> nx.Graph:
+    G: nx.Graph = nx.empty_graph(size)
+    step = 0
 
-    if graphs_per_mutation is None:
-        graphs_per_mutation = randint(min_size, max_size)
+    while step < max_steps:
+        priorities = []
 
-    for step in range(num_steps):
-        best_candidate = None
-        best_score = float('-inf')
+        candidate_graphs: list[Optional[nx.Graph]] = []
 
-        for mut_name, mut_func in MUTATION_REGISTRY.items():
-            print(f"Application de la mutation {mut_name}")
-            for _ in range(graphs_per_mutation):
-                try:
-                    g_mutated = mut_func(G)
+        for mutation_name, mutation_function in MUTATION_REGISTRY.items():
+            try:
+                G_temp = mutation_function(G.copy())
 
-                    n_nodes = g_mutated.number_of_nodes()
-                    if n_nodes < min_size or n_nodes > max_size:
-                        continue
+                p = priority(G_temp, size)
 
-                    score = priority(g_mutated)
+                priorities.append(p)
+                candidate_graphs.append(G_temp)
 
-                    if score > best_score:
-                        best_score = score
-                        best_candidate = g_mutated
+            except Exception:
+                priorities.append(float('-inf'))
+                candidate_graphs.append(None)
 
-                except Exception:
-                    continue
+        best_idx = int(np.argmax(priorities))
 
-        if best_candidate is not None:
-            G = best_candidate
-        else:
+        if priorities[best_idx] == float('-inf'):
             break
+
+        best_graph = candidate_graphs[best_idx]
+
+        if best_graph is not None:
+            G = best_graph
+
+        step += 1
 
     return G
 
 
 # @funsearch.evolve
-def priority(G: nx.Graph) -> float:
+def priority(G: nx.Graph, current_size: int) -> float:
     print("[DEBUG] : Nous sommes dans la fonction priority()")
-    return float(G.number_of_edges())
+    return 0
 
 
 @dataclass(slots=True)
