@@ -206,7 +206,8 @@ def main():
         "score_function_path": args.script,
         "score_function_name": args.function,
         "approx": args.approx,
-        "research_strategy": args.strategy
+        "research_strategy": args.strategy,
+        "funsearch_llm_provider": args.llm
     }
 
     print(f"Exécution du programme de réfutation avec le script python {args.script} pour la fonction de score {args.function}.")
