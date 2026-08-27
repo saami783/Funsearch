@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 from typing import List
 
-from conjectures_refutation.helpers import scores_function
 from conjectures_refutation.helpers.utility import load_conjectures
 
 from conjectures_refutation.refutation_heuristics.local_search import (
@@ -13,6 +12,7 @@ from conjectures_refutation.refutation_heuristics.local_search import (
     _derive_seed,
     process_all_conjectures,
 )
+from conjectures_refutation.refutation_heuristics.fun_search import evaluate
 
 
 def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus):
@@ -63,8 +63,10 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
     )
 
 
-def load_funsearch():
-    ...
+def load_funsearch(min_size, max_size, score_fn):
+    print("[DEBUG] : Nous sommes dans la fonction load_funsearch()")
+    score = evaluate(min_size, max_size, score_fn)
+    print(f"Score du graphe pour la conjecture : {score}")
 
 
 def main(min_size: int, max_size: int, time_limit: float, neighbors: int, max_mutations: int, stagnation: int, margin: float,
@@ -138,7 +140,8 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int, max_mu
     if research_strategy == "hill_climbing":
         load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
     else:
-        load_funsearch()
+        score_fn = selected[0]["score_function"]
+        load_funsearch(min_size, max_size, score_fn)
 
 
 def _load_identifiers(path: Path) -> List[str]:
