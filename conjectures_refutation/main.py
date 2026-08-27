@@ -65,8 +65,10 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
 
 def load_funsearch(min_size, max_size, score_fn):
     print("[DEBUG] : Nous sommes dans la fonction load_funsearch()")
-    score = evaluate(min_size, max_size, score_fn)
-    print(f"Score du graphe pour la conjecture : {score}")
+
+    for i in range(min_size, max_size):
+        score = evaluate(min_size, max_size, score_fn)
+        print(f"Score du graphe pour la conjecture : {score}")
 
 
 def main(min_size: int, max_size: int, time_limit: float, neighbors: int, max_mutations: int, stagnation: int, margin: float,
