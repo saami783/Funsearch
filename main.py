@@ -34,6 +34,7 @@ DEFAULT_MUTATION_NAMES: Tuple[str, ...] = _resolve_default_mutation_names()
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
@@ -122,6 +123,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--stagnation", type=int, default=10, help="Nombre d'itérations sans amélioration avant une réinitialisation.")
     parser.add_argument("--margin", type=float, default=1e-3, help="Marge numérique requise pour accepter un contre-exemple.")
     parser.add_argument("--cache-limit", type=int, default=None, help="Nombre maximal d'évaluations conservées en cache.")
+    parser.add_argument("--seed", type=int, default=42, help="Graine aléatoire utilisée pour la reproductibilité.")
+    parser.add_argument("--cpus", type=int, default=max(1, cpu_count() - 0), help="Nombre de processus workers ; <= 1 désactive le multiprocessing.")
 
     parser.add_argument(
         "--mutations",
@@ -141,12 +144,10 @@ def parse_args() -> argparse.Namespace:
         help="Opérateurs de mutation autorisés pendant la recherche."
     )
 
-    parser.add_argument("--seed", type=int, default=42, help="Graine aléatoire utilisée pour la reproductibilité.")
-    parser.add_argument("--cpus", type=int, default=max(1, cpu_count() - 0), help="Nombre de processus workers ; <= 1 désactive le multiprocessing.")
-
     args = parser.parse_args()
 
     return args
+
 
 def create_or_wipe_identifiers(identifiers_path: Path) -> None:
     if identifiers_path.exists():
@@ -158,6 +159,7 @@ def create_or_wipe_identifiers(identifiers_path: Path) -> None:
         print(f"Identifier file not found: {identifiers_path}")
         print("Creating file...")
         identifiers_path.touch()
+
 
 def main():
     from conjectures_refutation.main import main as conjectures_refutation_main
