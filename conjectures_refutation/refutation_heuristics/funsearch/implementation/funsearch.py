@@ -16,6 +16,7 @@
 """A single-threaded implementation of the FunSearch pipeline."""
 from collections.abc import Sequence
 from typing import Any
+import concurrent.futures
 
 from conjectures_refutation.refutation_heuristics.funsearch.implementation import code_manipulation
 from conjectures_refutation.refutation_heuristics.funsearch.implementation import config as config_lib
@@ -64,5 +65,16 @@ def main(specification: str, inputs: Sequence[Any], config: config_lib.Config):
   # This loop can be executed in parallel on remote sampler machines. As each
   # sampler enters an infinite loop, without parallelization only the first
   # sampler will do any work.
-  for s in samplers:
-    s.sample()
+  # for s in samplers:
+  #   s.sample()
+
+  print(f"[FunSearch] Lancement de {config.num_samplers} samplers en parallèle...")
+
+  with concurrent.futures.ThreadPoolExecutor(max_workers=config.num_samplers) as executor:
+      futures = [executor.submit(s.sample) for s in samplers]
+
+      for future in concurrent.futures.as_completed(futures):
+          try:
+              future.result()
+          except Exception as e:
+              print(f"[Erreur] Un sampler s'est arrêté avec l'erreur : {e}")
