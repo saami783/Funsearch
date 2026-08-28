@@ -2,7 +2,7 @@ import importlib.util
 import os
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Callable
 
 from conjectures_refutation.helpers.utility import load_conjectures
 
@@ -62,13 +62,31 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
         context_seed_pairs=context_seed_pairs
     )
 
+def load_funsearch(min_size: int, max_size: int, score_fn: Callable):
+    print("[DEBUG] : Initialisation du pipeline FunSearch...")
 
-def load_funsearch(min_size, max_size, score_fn):
-    print("[DEBUG] : Nous sommes dans la fonction load_funsearch()")
-
+    inputs = []
     for n in range(min_size, max_size):
-        score = evaluate(n, min_size, max_size, score_fn)
-        print(f"Score du graphe pour la conjecture : {score}")
+        inputs.append({
+            "size": n,
+            "min_size": min_size,
+            "max_size": max_size,
+            "score_fn": score_fn
+        })
+
+    from funsearch.implementation import config as config_lib
+    from funsearch.implementation import funsearch
+
+    config = config_lib.Config(
+        num_samplers=2,
+        num_evaluators=4,
+        samples_per_prompt=4
+    )
+
+    with open("conjectures_refutation/refutation_heuristics/fun_search.py", "r") as f:
+        specification_code = f.read()
+
+    funsearch.main(specification_code, inputs, config)
 
 
 def main(min_size: int, max_size: int, time_limit: float, neighbors: int, max_mutations: int, stagnation: int, margin: float,
