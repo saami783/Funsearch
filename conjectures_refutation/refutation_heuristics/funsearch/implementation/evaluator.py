@@ -15,6 +15,7 @@
 
 """Class for evaluating programs proposed by the Sampler."""
 import ast
+import multiprocessing
 from collections.abc import Sequence
 import copy
 from typing import Any
@@ -84,21 +85,60 @@ def _sample_to_program(
   evolved_function.body = body
   return evolved_function, str(program)
 
+def _sandbox_worker(program: str, function_to_run: str, test_input: Any, return_dict: dict):
+  """
+  Fonction exécutée dans un processus séparé.
+  Elle écrit le résultat dans le dictionnaire partagé 'return_dict'.
+  """
+  execution_env = {}
+  try:
+    exec(program, execution_env)
+
+    func = execution_env[function_to_run]
+    result = func(test_input)
+
+    return_dict['result'] = result
+    return_dict['success'] = True
+
+  except Exception as e:
+    return_dict['result'] = None
+    return_dict['success'] = False
 
 class Sandbox:
-  """Sandbox for executing generated code."""
+  """Sandbox locale utilisant exec() pour exécuter le code généré."""
 
   def run(
-      self,
-      program: str,
-      function_to_run: str,
-      test_input: str,
-      timeout_seconds: int,
+          self,
+          program: str,
+          function_to_run: str,
+          test_input: Any,
+          timeout_seconds: int,
   ) -> tuple[Any, bool]:
     """Returns `function_to_run(test_input)` and whether execution succeeded."""
-    raise NotImplementedError(
-        'Must provide a sandbox for executing untrusted code.')
 
+    manager = multiprocessing.Manager()
+    return_dict = manager.dict()
+    return_dict['result'] = None
+    return_dict['success'] = False
+
+    p = multiprocessing.Process(
+      target=_sandbox_worker,
+      args=(program, function_to_run, test_input, return_dict)
+    )
+
+    p.start()
+
+    p.join(timeout_seconds)
+
+    if p.is_alive():
+      print(f"[Sandbox] ⏱️ Timeout atteint ({timeout_seconds}s). Arrêt forcé du programme généré.")
+
+      p.terminate()
+      p.join()
+
+      return None, False
+
+    return return_dict['result'], return_dict['success']
 
 def _calls_ancestor(program: str, function_to_evolve: str) -> bool:
   """Returns whether the generated function is calling an earlier version."""
