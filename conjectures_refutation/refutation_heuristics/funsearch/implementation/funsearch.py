@@ -54,6 +54,7 @@ def main(specification: str, inputs: Sequence[Any], config: config_lib.Config):
         function_to_evolve,
         function_to_run,
         inputs,
+        timeout_seconds=config.evaluate_time_limit
     ))
   # We send the initial implementation to be analysed by one of the evaluators.
   initial = template.get_function(function_to_evolve).body

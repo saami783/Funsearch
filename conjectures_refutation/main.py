@@ -105,7 +105,7 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
         programs_database=programs_database_config,
         num_samplers=safe_samplers,
         num_evaluators=safe_evaluators,
-        samples_per_prompt=4  # 4 générations par prompt, comme conseillé par DeepMind
+        samples_per_prompt=4,  # 4 générations par prompt, comme conseillé par DeepMind
     )
 
     with open("conjectures_refutation/refutation_heuristics/specification.py", "r") as f:
