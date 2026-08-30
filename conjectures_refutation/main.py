@@ -1,4 +1,5 @@
 import importlib.util
+import multiprocessing
 import os
 import sys
 from pathlib import Path
@@ -61,7 +62,7 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
         context_seed_pairs=context_seed_pairs
     )
 
-def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str, score_function_name: str,):
+def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str, score_function_name: str, use_local_llm: bool):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
 
     inputs = []
@@ -78,10 +79,26 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
     from funsearch.implementation import config as config_lib
     from funsearch.implementation import funsearch
 
+    programs_database_config = config_lib.ProgramsDatabaseConfig(
+        functions_per_prompt=2,  # k = 2 programmes fusionnés dans le prompt
+        num_islands=10,  # 10 îles pour maintenir la diversité
+        reset_period=4 * 60 * 60,  # Réinitialisation des mauvaises îles toutes les 4h
+        cluster_sampling_temperature_init=0.1,  # Température de Boltzmann pour l'exploration
+        cluster_sampling_temperature_period=30_000
+    )
+
+    safe_evaluators = max(1, multiprocessing.cpu_count() - 2)
+
+    if use_local_llm:
+        safe_samplers = 2 # Le nombre de requêtes simultanées envoyées à ton second PC
+    else:
+        safe_samplers = 4
+
     config = config_lib.Config(
-        num_samplers=2,
-        num_evaluators=4,
-        samples_per_prompt=4
+        programs_database=programs_database_config,
+        num_samplers=safe_samplers,
+        num_evaluators=safe_evaluators,
+        samples_per_prompt=4  # 4 générations par prompt, comme conseillé par DeepMind
     )
 
     with open("conjectures_refutation/refutation_heuristics/specification.py", "r") as f:
@@ -90,16 +107,12 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
     funsearch.main(specification_code, inputs, config)
 
 
-def main(min_size: int, max_size: int, time_limit: float, neighbors: int, max_mutations: int, stagnation: int, margin: float,
-        seed: int, mutation_names: tuple[str, ...], cpus: int,
-        score_function_path: str, score_function_name: str,
-         research_strategy: str,
-         approx: bool,
-         funsearch_llm_provider: str | None,
-         funsearch_llm_temperature: float | None,
-         funsearch_llm_max_tokens: int | None,
-         subclass: str | None,
-         np_hard_invariants: bool) -> None:
+def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
+         max_mutations: int, stagnation: int, margin: float,
+         seed: int, mutation_names: tuple[str, ...], cpus: int,
+         score_function_path: str, score_function_name: str,
+         research_strategy: str, use_local_llm: bool, approx: bool,
+         subclass: str | None, np_hard_invariants: bool) -> None:
 
     output_dir = Path("out")
     identifiers = _load_identifiers(Path("conjectures_refutation/data/identifiers.txt"))
@@ -161,7 +174,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int, max_mu
     if research_strategy == "hill_climbing":
         load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
     else:
-        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name)
+        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name, use_local_llm)
 
 
 def _load_identifiers(path: Path) -> List[str]:

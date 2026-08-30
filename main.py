@@ -72,6 +72,16 @@ def parse_args() -> argparse.Namespace:
         )
     )
 
+    refutation_with_score_function.add_argument(
+        "--local-llm",
+        action="store_true",
+        default=False,
+        help=(
+            "Utilisation d'un LLM en local ou via requête API (OpenAI etc...). Ce paramètre permet de faire varier"
+            "le nombre de requêtes simultanées envoyées. 2 requêtes pour un LLM en local vs 4 pour un LLM hébergé."
+        )
+    )
+
     parser.add_argument(
         "--strategy",
         choices=["hill_climbing", "funsearch"],
@@ -222,7 +232,8 @@ def main():
         "approx": args.approx,
         "research_strategy": args.strategy,
         "funsearch_llm_provider": args.llm,
-        "np_hard_invariants": args.np_hard
+        "np_hard_invariants": args.np_hard,
+        "use_local_llm": args.local_llm
     }
 
     print(f"Exécution du programme de réfutation avec le script python {args.script} pour la fonction de score {args.function}.")
