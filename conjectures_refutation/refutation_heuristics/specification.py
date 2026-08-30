@@ -1,12 +1,13 @@
 import importlib
 import os
 import sys
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 import networkx as nx
 import numpy as np
 
 from conjectures_refutation.refutation_heuristics.funsearch.helpers import dummy_funsearch as funsearch
 from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_invariants import MUTATION_REGISTRY, compute_invariants
+from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_result import log_result
 
 
 @funsearch.run
@@ -31,9 +32,11 @@ def evaluate(input_dict: dict) -> float:
     custom_module = importlib.import_module(module_name)
     score_fn = getattr(custom_module, score_function_name)
 
-    G = solve(size, np_hard_invariants)
+    G, total_mutations, total_graphs_generated = solve(size, np_hard_invariants)
 
     score = score_fn(G, min_size, max_size)
+
+    log_result(G, score, total_mutations, total_graphs_generated, min_size, max_size)
 
     if score is None:
         return -10000.0
@@ -41,9 +44,12 @@ def evaluate(input_dict: dict) -> float:
     return float(-score)
 
 
-def solve(size: int, np_hard_invariants: bool, max_steps: int = 500) -> nx.Graph:
+def solve(size: int, np_hard_invariants: bool, max_steps: int = 500) -> Tuple[nx.Graph, int, int]:
     G: nx.Graph = nx.empty_graph(size)
     step = 0
+
+    total_mutations = 0
+    total_graphs_generated = 1
 
     while step < max_steps:
         priorities = []
@@ -51,8 +57,10 @@ def solve(size: int, np_hard_invariants: bool, max_steps: int = 500) -> nx.Graph
         candidate_graphs: list[Optional[nx.Graph]] = []
 
         for mutation_name, mutation_function in MUTATION_REGISTRY.items():
+            total_mutations += 1
             try:
                 G_temp = mutation_function(G.copy())
+                total_graphs_generated += 1
 
                 invariants = compute_invariants(G_temp, np_hard_invariants)
 
@@ -77,7 +85,7 @@ def solve(size: int, np_hard_invariants: bool, max_steps: int = 500) -> nx.Graph
 
         step += 1
 
-    return G
+    return G, total_mutations, total_graphs_generated
 
 
 @funsearch.evolve

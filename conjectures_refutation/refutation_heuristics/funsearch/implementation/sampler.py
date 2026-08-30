@@ -61,6 +61,9 @@ class LLM:
     def _draw_sample(self, prompt: str) -> str:
         """Appelle l'API du LLM pour générer une complétion."""
 
+        with open("api_requests_count.txt", "a", encoding="utf-8") as f:
+            f.write("1\n")
+
         try:
             payload = {
                 "prompt": prompt,

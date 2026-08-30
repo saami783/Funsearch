@@ -65,6 +65,11 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
 def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str, score_function_name: str, use_local_llm: bool):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
 
+    if os.path.exists("api_requests_count.txt"):
+        os.remove("api_requests_count.txt")
+    if os.path.exists("funsearch_metrics.jsonl"):
+        os.remove("funsearch_metrics.jsonl")
+
     inputs = []
     for n in range(min_size, max_size):
         inputs.append({
