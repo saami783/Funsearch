@@ -197,8 +197,10 @@ def main():
             raise Exception("Veuillez spécifier le LLM à utiliser pour Funsearch (ex: --llm gpt-5.4).")
 
     if args.strategy == "hill_climbing":
-        if args.np_hard is True:
+        if args.np_hard:
             print("[Warning] le calcul d'invariants NP-Difficiles ne peut s'activer qu'avec Funsearch.")
+        if args.llm_local:
+            print("[Warning] l'utilisation d'un llm en local ou hébergé ne peut s'activer qu'avec Funsearch.")
 
     print(f"Affichage du nom du fichier : {args.script}")
     print(f"Affichage du nom de la fonction de score : {args.function}")
