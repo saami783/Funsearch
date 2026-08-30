@@ -2,10 +2,19 @@ from dataclasses import dataclass
 from typing import Optional, Tuple, Callable, Dict, List, Any
 import networkx as nx
 import numpy as np
+import conjectures_refutation.helpers.invariants as invariants
 
+class DummyFunsearch:
+    """Décorateurs factices pour satisfaire l'interpréteur Python."""
+    @staticmethod
+    def run(func):
+        return func
 
-import networkx as nx
+    @staticmethod
+    def evolve(func):
+        return func
 
+funsearch = DummyFunsearch()
 
 def _get_next_node_id(G: nx.Graph, count: int = 1) -> list:
     """Retourne une liste d'identifiants uniques pour de nouveaux nœuds."""
@@ -224,20 +233,60 @@ MUTATION_REGISTRY: Dict[str, FunSearchMutationFunction] = {
 }
 
 
-# @funsearch.run
-def evaluate(input: dict) -> float:
+def compute_invariants(G: nx.Graph, np_hard_invariants: bool) -> Dict[str, float]:
+    """Calcule les propriétés topologiques pour guider le LLM."""
+
+    return {
+        "is_connected": invariants.is_connected(G),
+        "is_complete": invariants.is_complete(G),
+        "is_tree": invariants.is_tree(G),
+        "is_path": invariants.is_path(G),
+        "is_star": invariants.is_star(G),
+        "is_planar": invariants.is_planar(G),
+        "is_chordal": invariants.is_chordal(G),
+        "is_bipartite": invariants.is_bipartite(G),
+        "is_triangle_free": invariants.triangle_number(G),
+        "is_eulerian": invariants.is_eulerian(G),
+        "is_hamiltonian": invariants.is_hamiltonian(G),
+        "is_regular": invariants.is_regular(G),
+        "contains_induced_subgraph": invariants.contains_induced_subgraph(G),
+        "is_claw_free": invariants.is_claw_free(G),
+        "is_bull_free": invariants.is_bull_free(G),
+        "is_paw_free": invariants.is_paw_free(G),
+        "is_diamond_free": invariants.is_diamond_free(G),
+        "diameter": invariants.diameter(G),
+        "radius": invariants.radius(G),
+        "number_of_components": invariants.number_of_components(G),
+        "largest_component_ratio": invariants.largest_component_ratio(G),
+        "degree_variance": invariants.degree_variance(G),
+        "average_clustering": invariants.average_clustering(G),
+        "number_of_leaves": invariants.number_of_leaves(G),
+        "number_of_articulation_points": invariants.number_of_articulation_points(G),
+        "number_of_bridges": invariants.number_of_bridges(G),
+        "girth": invariants.girth(G),
+        "circumference": invariants.circumference(G),
+        "size": invariants.size(G),
+        "order": invariants.order(G),
+        "max_degree": invariants.maximum_degree(G),
+        "min_degree": invariants.minimum_degree(G),
+        "avg_degree": invariants.average_degree(G),
+        "density": invariants.density(G),
+    }
+
+@funsearch.run
+def evaluate(input: dict, np_hard_invariants: bool) -> float:
     size = input["size"]
     score_fn = input["score_fn"]
     min_size = input["min_size"]
     max_size = input["max_size"]
 
-    G = solve(size)
+    G = solve(size, np_hard_invariants)
     score = score_fn(G, min_size, max_size)
 
     return float(-score)
 
 
-def solve(size: int, max_steps: int = 500) -> nx.Graph:
+def solve(size: int, np_hard_invariants: bool, max_steps: int = 500) -> nx.Graph:
     G: nx.Graph = nx.empty_graph(size)
     step = 0
 
@@ -250,9 +299,9 @@ def solve(size: int, max_steps: int = 500) -> nx.Graph:
             try:
                 G_temp = mutation_function(G.copy())
 
-                p = priority(G_temp, size)
+                invariants = compute_invariants(G_temp, np_hard_invariants)
 
-                # @todo : calculer les invariants
+                p = priority(G_temp, size, invariants)
 
                 priorities.append(p)
                 candidate_graphs.append(G_temp)
@@ -276,8 +325,8 @@ def solve(size: int, max_steps: int = 500) -> nx.Graph:
     return G
 
 
-# @funsearch.evolve
-def priority(G: nx.Graph, current_size: int, invariants: List[Any]) -> float:
+@funsearch.evolve
+def priority(G: nx.Graph, current_size: int, invariants: Dict[str, float]) -> float:
     print("[DEBUG] : Nous sommes dans la fonction priority()")
     return 0
 

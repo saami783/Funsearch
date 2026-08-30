@@ -62,7 +62,7 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
         context_seed_pairs=context_seed_pairs
     )
 
-def load_funsearch(min_size: int, max_size: int, score_fn: Callable):
+def load_funsearch(min_size: int, max_size: int, score_fn: Callable, np_hard_invariants: bool):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
 
     inputs = []
@@ -71,7 +71,8 @@ def load_funsearch(min_size: int, max_size: int, score_fn: Callable):
             "size": n,
             "min_size": min_size,
             "max_size": max_size,
-            "score_fn": score_fn
+            "score_fn": score_fn,
+            "np_hard_invariants": np_hard_invariants
         })
 
     from funsearch.implementation import config as config_lib
@@ -98,7 +99,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int, max_mu
          funsearch_llm_temperature: float | None,
          funsearch_llm_max_tokens: int | None,
          subclass: str | None,
-         **_ignored_kwargs) -> None:
+         np_hard_invariants: bool) -> None:
 
     output_dir = Path("out")
     identifiers = _load_identifiers(Path("conjectures_refutation/data/identifiers.txt"))
@@ -161,7 +162,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int, max_mu
         load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
     else:
         score_fn = selected[0]["score_function"]
-        load_funsearch(min_size, max_size, score_fn)
+        load_funsearch(min_size, max_size, score_fn, np_hard_invariants)
 
 
 def _load_identifiers(path: Path) -> List[str]:

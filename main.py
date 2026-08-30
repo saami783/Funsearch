@@ -91,6 +91,16 @@ def parse_args() -> argparse.Namespace:
         )
     )
 
+    funsearch_group = parser.add_argument_group("Configuration FunSearch")
+    funsearch_group.add_argument(
+        "--np-hard",
+        action="store_true",
+        default=False,
+        help=(
+            "Calcul d'une liste d'invariants NP-difficiles pour guider le LLM."
+        )
+    )
+
     funsearch_group.add_argument(
         "--funsearch-llm-temperature",
         type=float,
@@ -176,6 +186,10 @@ def main():
         if not args.llm:
             raise Exception("Veuillez spécifier le LLM à utiliser pour Funsearch (ex: --llm gpt-5.4).")
 
+    if args.strategy == "hill_climbing":
+        if args.np_hard is True:
+            print("[Warning] le calcul d'invariants NP-Difficiles ne peut s'activer qu'avec Funsearch.")
+
     print(f"Affichage du nom du fichier : {args.script}")
     print(f"Affichage du nom de la fonction de score : {args.function}")
 
@@ -207,7 +221,8 @@ def main():
         "score_function_name": args.function,
         "approx": args.approx,
         "research_strategy": args.strategy,
-        "funsearch_llm_provider": args.llm
+        "funsearch_llm_provider": args.llm,
+        "np_hard_invariants": args.np_hard
     }
 
     print(f"Exécution du programme de réfutation avec le script python {args.script} pour la fonction de score {args.function}.")
