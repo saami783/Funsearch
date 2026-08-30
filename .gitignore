@@ -2,3 +2,5 @@
 /conjectures_refutation/data/identifiers.txt
 /out/*
 .DS_Store
+.idea
+/conjectures_refutation/.DS_Store
