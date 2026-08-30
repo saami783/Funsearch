@@ -66,7 +66,7 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
 
 def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str,
                    score_function_name: str, use_local_llm: bool, subclass: str|None, evaluate_time_limit: int,
-                   reset_period_island: int, end_time: float, cpus: int, approx: bool):
+                   reset_period_island: int, time_limit: float, cpus: int, approx: bool):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
 
     if os.path.exists("api_requests_count.txt"):
@@ -116,7 +116,9 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
 
     start_time = time.time()
 
-    funsearch.main(specification_code, inputs, config, end_time)
+    calcul_end_time = start_time + time_limit if time_limit else None
+
+    funsearch.main(specification_code, inputs, config, calcul_end_time)
 
     execution_time = time.time() - start_time
 
@@ -129,7 +131,7 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
         use_local_llm=use_local_llm,
         evaluate_time_limit=evaluate_time_limit,
         reset_period_island=reset_period_island,
-        time_limit=end_time,
+        time_limit=time_limit,
         execution_time=execution_time,
         x_val=None,
         y_val=None,
