@@ -2,6 +2,7 @@ import importlib.util
 import multiprocessing
 import os
 import sys
+import time
 from pathlib import Path
 from typing import List
 
@@ -13,6 +14,7 @@ from conjectures_refutation.refutation_heuristics.local_search import (
     _derive_seed,
     process_all_conjectures,
 )
+from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_result import build_result, create_log_file
 
 
 def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus):
@@ -62,7 +64,7 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
         context_seed_pairs=context_seed_pairs
     )
 
-def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str, score_function_name: str, use_local_llm: bool):
+def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str, score_function_name: str, use_local_llm: bool, subclass: str|None):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
 
     if os.path.exists("api_requests_count.txt"):
@@ -109,7 +111,29 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
     with open("conjectures_refutation/refutation_heuristics/specification.py", "r") as f:
         specification_code = f.read()
 
+    start_time = time.time()
+
     funsearch.main(specification_code, inputs, config)
+
+    execution_time = time.time() - start_time
+
+    final_result = build_result(
+        execution_time=execution_time,
+        x_val=None,
+        y_val=None,
+        seed=42,
+        llm_provider="Local" if use_local_llm else "Cloud",
+        llm_temperature="1.0",
+        subclass=subclass
+    )
+
+    create_log_file(final_result)
+
+    if final_result.has_counterexample:
+        print(f"[BILAN] Contre-exemple trouvé: {final_result.has_counterexample} ! Score: {final_result.score}")
+    else :
+        print(f"[BILAN] Aucun contre-exemple trouvé. Meilleur score : {final_result.score}")
+    print(f"[BILAN] Requêtes API totales: {final_result.total_api_requests}")
 
 
 def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
@@ -179,7 +203,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
     if research_strategy == "hill_climbing":
         load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
     else:
-        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name, use_local_llm)
+        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass)
 
 
 def _load_identifiers(path: Path) -> List[str]:
