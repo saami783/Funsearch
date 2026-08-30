@@ -62,6 +62,13 @@ def parse_args() -> argparse.Namespace:
     )
 
     refutation_with_score_function.add_argument(
+        "--time-limit-llm-execution",
+        help=(
+            "Temps maximum accordé au code généré par le LLM pour s'exécuter sur un graphe (30 secondes par défaut)."
+        )
+    )
+
+    refutation_with_score_function.add_argument(
         "--approx",
         action="store_true",
         default=False,
@@ -235,7 +242,8 @@ def main():
         "research_strategy": args.strategy,
         "funsearch_llm_provider": args.llm,
         "np_hard_invariants": args.np_hard,
-        "use_local_llm": args.local_llm
+        "use_local_llm": args.local_llm,
+        "evaluate_time_limit": args.time_limit_llm_execution
     }
 
     print(f"Exécution du programme de réfutation avec le script python {args.script} pour la fonction de score {args.function}.")
