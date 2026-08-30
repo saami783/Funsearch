@@ -66,7 +66,7 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
 
 def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str,
                    score_function_name: str, use_local_llm: bool, subclass: str|None, evaluate_time_limit: int,
-                   reset_period_island: int, end_time: float):
+                   reset_period_island: int, end_time: float, cpus: int, approx: bool):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
 
     if os.path.exists("api_requests_count.txt"):
@@ -121,6 +121,15 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
     execution_time = time.time() - start_time
 
     final_result = build_result(
+        cpus=cpus,
+        score_function_path=score_function_path,
+        score_function_name=score_function_name,
+        approx=approx,
+        np_hard_invariants=np_hard_invariants,
+        use_local_llm=use_local_llm,
+        evaluate_time_limit=evaluate_time_limit,
+        reset_period_island=reset_period_island,
+        time_limit=end_time,
         execution_time=execution_time,
         x_val=None,
         y_val=None,
@@ -206,7 +215,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
     if research_strategy == "hill_climbing":
         load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
     else:
-        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass, evaluate_time_limit, reset_period_island, time_limit)
+        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass, evaluate_time_limit, reset_period_island, time_limit, cpus, approx)
 
 
 def _load_identifiers(path: Path) -> List[str]:

@@ -25,11 +25,18 @@ class FunSearchResult:
     funsearch_llm_provider: str|None
     funsearch_llm_temperature: str|None
     subclass: str|None
+    cpus: int
+    score_function_path: str
+    score_function_name: str
+    approx: bool
+    np_hard_invariants: bool
+    use_local_llm: str
+    evaluate_time_limit: int
+    reset_period_island: int
+    time_limit: int
 
     x_value: Optional[float]|None
     y_value: Optional[float]|None
-
-    # @todo : ajouter tous les paramètres utilisés
 
 
 def log_result(G, score, total_mutations, total_graphs_generated, min_size, max_size):
@@ -51,13 +58,15 @@ def log_result(G, score, total_mutations, total_graphs_generated, min_size, max_
 
 
 def build_result(
+        cpus, score_function_path, score_function_name, approx, np_hard_invariants, use_local_llm, evaluate_time_limit, reset_period_island, time_limit,
         execution_time: Optional[float] = None,
         x_val: Optional[float] = None,
         y_val: Optional[float] = None,
         seed: Optional[int] = None,
         llm_provider: Optional[str] = None,
         llm_temperature: Optional[str] = None,
-        subclass: Optional[str] = None
+        subclass: Optional[str] = None,
+
 ) -> FunSearchResult:
     total_api = 0
     if os.path.exists("api_requests_count.txt"):
@@ -92,7 +101,16 @@ def build_result(
             seed=seed,
             funsearch_llm_provider=llm_provider,
             funsearch_llm_temperature=llm_temperature,
-            subclass=subclass
+            subclass=subclass,
+            cpus=cpus,
+            score_function_path=score_function_path,
+            score_function_name=score_function_name,
+            approx=approx,
+            np_hard_invariants=np_hard_invariants,
+            use_local_llm=use_local_llm,
+            evaluate_time_limit=evaluate_time_limit,
+            reset_period_island=reset_period_island,
+            time_limit=time_limit
         )
 
     return FunSearchResult(
@@ -111,7 +129,16 @@ def build_result(
         seed=seed,
         funsearch_llm_provider=llm_provider,
         funsearch_llm_temperature=llm_temperature,
-        subclass=subclass
+        subclass=subclass,
+        cpus=cpus,
+        score_function_path=score_function_path,
+        score_function_name=score_function_name,
+        approx=approx,
+        np_hard_invariants=np_hard_invariants,
+        use_local_llm=use_local_llm,
+        evaluate_time_limit=evaluate_time_limit,
+        reset_period_island=reset_period_island,
+        time_limit=time_limit
     )
 
 
