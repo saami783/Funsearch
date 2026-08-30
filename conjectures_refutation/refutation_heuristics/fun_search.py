@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from operator import invert
 from typing import Optional, Tuple, Callable, Dict, List, Any
 import networkx as nx
 import numpy as np
@@ -236,7 +237,7 @@ MUTATION_REGISTRY: Dict[str, FunSearchMutationFunction] = {
 def compute_invariants(G: nx.Graph, np_hard_invariants: bool) -> Dict[str, float]:
     """Calcule les propriétés topologiques pour guider le LLM."""
 
-    return {
+    list_invariants = {
         "is_connected": invariants.is_connected(G),
         "is_complete": invariants.is_complete(G),
         "is_tree": invariants.is_tree(G),
@@ -271,7 +272,45 @@ def compute_invariants(G: nx.Graph, np_hard_invariants: bool) -> Dict[str, float
         "min_degree": invariants.minimum_degree(G),
         "avg_degree": invariants.average_degree(G),
         "density": invariants.density(G),
+        "matching_number": invariants.matching_number(G),
+        "spanning_tree_number": invariants.spanning_tree_number(G),
+        "vertex_connectivity": invariants.vertex_connectivity(G),
+        "edge_connectivity": invariants.edge_connectivity(G),
+        "triangle_number": invariants.triangle_number(G),
+        "proximity": invariants.proximity(G),
+        "remoteness": invariants.remoteness(G),
+        "harmonic_index": invariants.harmonic_index(G),
+        "randic_index": invariants.randic_index(G),
+        "modified_zagreb_2": invariants.modified_zagreb_2(G),
+        "spectrum": invariants.spectrum(G),
+        "largest_eigenvalue": invariants.largest_eigenvalue(G),
+        "largest_distance_eigenvalue": invariants.largest_distance_eigenvalue(G),
+        "connectivity": invariants.connectivity(G),
+        "p_A": invariants.p_A(G),
+        "p_D": invariants.p_D(G),
+        "m": invariants.m(G)
     }
+
+    if np_hard_invariants:
+        list_invariants.update(
+            {
+                "treewidth": invariants.treewidth(G),
+                "longest_path": invariants.longest_path(G),
+                "longest_induced_path": invariants.longest_induced_path(G),
+                "longest_induced_cycle": invariants.longest_induced_cycle(G),
+                "chromatic_number": invariants.chromatic_number(G),
+                "chromatic_index": invariants.chromatic_index(G),
+                "clique_number": invariants.clique_number(G),
+                "independence_number": invariants.independence_number(G),
+                "vertex_cover_number": invariants.vertex_cover_number(G),
+                "feedback_vertex_set_number": invariants.feedback_vertex_set_number(G),
+                "domination_number": invariants.domination_number(G),
+                "total_domination_number": invariants.total_domination_number(G),
+                "independent_domination_number": invariants.independent_domination_number(G)
+            }
+        )
+
+    return list_invariants
 
 @funsearch.run
 def evaluate(input: dict, np_hard_invariants: bool) -> float:
