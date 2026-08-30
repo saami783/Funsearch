@@ -38,7 +38,7 @@ def _extract_function_names(specification: str) -> tuple[str, str]:
   return evolve_functions[0], run_functions[0]
 
 
-def main(specification: str, inputs: Sequence[Any], config: config_lib.Config):
+def main(specification: str, inputs: Sequence[Any], config: config_lib.Config, end_time: float):
   """Launches a FunSearch experiment."""
   function_to_evolve, function_to_run = _extract_function_names(specification)
 
@@ -60,7 +60,7 @@ def main(specification: str, inputs: Sequence[Any], config: config_lib.Config):
   initial = template.get_function(function_to_evolve).body
   evaluators[0].analyse(initial, island_id=None, version_generated=None)
 
-  samplers = [sampler.Sampler(database, evaluators, config.samples_per_prompt)
+  samplers = [sampler.Sampler(database, evaluators, config.samples_per_prompt, end_time)
               for _ in range(config.num_samplers)]
 
   # This loop can be executed in parallel on remote sampler machines. As each

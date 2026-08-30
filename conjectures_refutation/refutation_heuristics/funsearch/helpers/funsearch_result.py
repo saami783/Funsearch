@@ -29,6 +29,8 @@ class FunSearchResult:
     x_value: Optional[float]|None
     y_value: Optional[float]|None
 
+    # @todo : ajouter tous les paramètres utilisés
+
 
 def log_result(G, score, total_mutations, total_graphs_generated, min_size, max_size):
     is_counterexample = (score is not None) and (score > 0)

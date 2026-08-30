@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """Class for sampling new programs."""
+import time
 from collections.abc import Collection, Sequence
 import requests
 import numpy as np
@@ -98,14 +99,20 @@ class Sampler:
             database: programs_database.ProgramsDatabase,
             evaluators: Sequence[evaluator.Evaluator],
             samples_per_prompt: int,
+            end_time: float
     ) -> None:
         self._database = database
         self._evaluators = evaluators
         self._llm = LLM(samples_per_prompt)
+        self._end_time = end_time
 
     def sample(self):
         """Continuously gets prompts, samples programs, sends them for analysis."""
         while True:
+            if self._end_time is not None and time.time() > self._end_time:
+                print("[Sampler] Temps limite écoulé. Arrêt du programme...")
+                break
+
             prompt = self._database.get_prompt()
             samples = self._llm.draw_samples(prompt.code)
             # This loop can be executed in parallel on remote evaluator machines.
