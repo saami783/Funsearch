@@ -64,7 +64,7 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
         context_seed_pairs=context_seed_pairs
     )
 
-def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str, score_function_name: str, use_local_llm: bool, subclass: str|None, evaluate_time_limit: int|None):
+def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str, score_function_name: str, use_local_llm: bool, subclass: str|None, evaluate_time_limit: int):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
 
     if os.path.exists("api_requests_count.txt"):
@@ -101,21 +101,13 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
     else:
         safe_samplers = 4
 
-    if evaluate_time_limit is not None:
-        config = config_lib.Config(
-            programs_database=programs_database_config,
-            num_samplers=safe_samplers,
-            num_evaluators=safe_evaluators,
-            samples_per_prompt=4,  # 4 générations par prompt, comme conseillé par DeepMind
-            evaluate_time_limit=evaluate_time_limit
-        )
-    else:
-        config = config_lib.Config(
-            programs_database=programs_database_config,
-            num_samplers=safe_samplers,
-            num_evaluators=safe_evaluators,
-            samples_per_prompt=4,
-        )
+    config = config_lib.Config(
+        programs_database=programs_database_config,
+        num_samplers=safe_samplers,
+        num_evaluators=safe_evaluators,
+        samples_per_prompt=4,  # 4 générations par prompt, comme conseillé par DeepMind
+        evaluate_time_limit=evaluate_time_limit
+    )
 
     with open("conjectures_refutation/refutation_heuristics/specification.py", "r") as f:
         specification_code = f.read()
@@ -150,7 +142,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
          seed: int, mutation_names: tuple[str, ...], cpus: int,
          score_function_path: str, score_function_name: str,
          research_strategy: str, use_local_llm: bool, approx: bool,
-         subclass: str | None, np_hard_invariants: bool, evaluate_time_limit: int|None) -> None:
+         subclass: str | None, np_hard_invariants: bool, evaluate_time_limit: int) -> None:
 
     output_dir = Path("out")
     identifiers = _load_identifiers(Path("conjectures_refutation/data/identifiers.txt"))

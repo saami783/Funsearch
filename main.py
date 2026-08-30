@@ -63,6 +63,8 @@ def parse_args() -> argparse.Namespace:
 
     refutation_with_score_function.add_argument(
         "--time-limit-llm-execution",
+        type=int,
+        default=6,
         help=(
             "Temps maximum accordé au code généré par le LLM pour s'exécuter sur un graphe (30 secondes par défaut)."
         )
