@@ -204,7 +204,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
     if research_strategy == "hill_climbing":
         load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
     else:
-        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass, evaluate_time_limit, reset_period_islands)
+        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass, evaluate_time_limit, reset_period_island)
 
 
 def _load_identifiers(path: Path) -> List[str]:
