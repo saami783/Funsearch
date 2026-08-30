@@ -3,7 +3,7 @@ import multiprocessing
 import os
 import sys
 from pathlib import Path
-from typing import List, Callable
+from typing import List
 
 from conjectures_refutation.helpers.utility import load_conjectures
 
