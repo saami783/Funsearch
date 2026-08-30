@@ -71,6 +71,15 @@ def parse_args() -> argparse.Namespace:
     )
 
     refutation_with_score_function.add_argument(
+        "--reset-period-island",
+        type=int,
+        default=4 * 60 * 60,
+        help=(
+            "temps au bout duquel FunSearch supprime les mauvaises îles pour relancer l'exploration à partir des meilleures découvertes (4 heures par défaut)."
+        )
+    )
+
+    refutation_with_score_function.add_argument(
         "--approx",
         action="store_true",
         default=False,
@@ -245,7 +254,8 @@ def main():
         "funsearch_llm_provider": args.llm,
         "np_hard_invariants": args.np_hard,
         "use_local_llm": args.local_llm,
-        "evaluate_time_limit": args.time_limit_llm_execution
+        "evaluate_time_limit": args.time_limit_llm_execution,
+        "reset_period_island": args.reset_period_island
     }
 
     print(f"Exécution du programme de réfutation avec le script python {args.script} pour la fonction de score {args.function}.")

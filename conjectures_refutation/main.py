@@ -64,7 +64,7 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
         context_seed_pairs=context_seed_pairs
     )
 
-def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str, score_function_name: str, use_local_llm: bool, subclass: str|None, evaluate_time_limit: int):
+def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str, score_function_name: str, use_local_llm: bool, subclass: str|None, evaluate_time_limit: int, reset_period_island: int):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
 
     if os.path.exists("api_requests_count.txt"):
@@ -89,9 +89,9 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
     programs_database_config = config_lib.ProgramsDatabaseConfig(
         functions_per_prompt=2,  # k = 2 programmes fusionnés dans le prompt
         num_islands=10,  # 10 îles pour maintenir la diversité
-        reset_period=4 * 60 * 60,  # Réinitialisation des mauvaises îles toutes les 4h
+        reset_period=reset_period_island,
         cluster_sampling_temperature_init=0.1,  # Température de Boltzmann pour l'exploration
-        cluster_sampling_temperature_period=30_000
+        cluster_sampling_temperature_period=30_000,
     )
 
     safe_evaluators = max(1, multiprocessing.cpu_count() - 2)
@@ -142,7 +142,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
          seed: int, mutation_names: tuple[str, ...], cpus: int,
          score_function_path: str, score_function_name: str,
          research_strategy: str, use_local_llm: bool, approx: bool,
-         subclass: str | None, np_hard_invariants: bool, evaluate_time_limit: int) -> None:
+         subclass: str | None, np_hard_invariants: bool, evaluate_time_limit: int, reset_period_island: int) -> None:
 
     output_dir = Path("out")
     identifiers = _load_identifiers(Path("conjectures_refutation/data/identifiers.txt"))
@@ -204,7 +204,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
     if research_strategy == "hill_climbing":
         load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
     else:
-        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass, evaluate_time_limit)
+        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass, evaluate_time_limit, reset_period_islands)
 
 
 def _load_identifiers(path: Path) -> List[str]:
