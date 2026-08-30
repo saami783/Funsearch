@@ -6,8 +6,9 @@ import networkx as nx
 import numpy as np
 
 from conjectures_refutation.refutation_heuristics.funsearch.helpers import dummy_funsearch as funsearch
-from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_invariants import MUTATION_REGISTRY, compute_invariants
+from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_invariants import compute_invariants
 from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_result import log_result
+from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_mutations import MUTATION_REGISTRY
 
 
 @funsearch.run
