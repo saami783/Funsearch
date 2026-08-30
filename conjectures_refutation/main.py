@@ -62,7 +62,7 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
         context_seed_pairs=context_seed_pairs
     )
 
-def load_funsearch(min_size: int, max_size: int, score_fn: Callable, np_hard_invariants: bool):
+def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str, score_function_name: str,):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
 
     inputs = []
@@ -71,7 +71,8 @@ def load_funsearch(min_size: int, max_size: int, score_fn: Callable, np_hard_inv
             "size": n,
             "min_size": min_size,
             "max_size": max_size,
-            "score_fn": score_fn,
+            "score_function_path": score_function_path,
+            "score_function_name": score_function_name,
             "np_hard_invariants": np_hard_invariants
         })
 
@@ -161,8 +162,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int, max_mu
     if research_strategy == "hill_climbing":
         load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
     else:
-        score_fn = selected[0]["score_function"]
-        load_funsearch(min_size, max_size, score_fn, np_hard_invariants)
+        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name)
 
 
 def _load_identifiers(path: Path) -> List[str]:

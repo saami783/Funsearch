@@ -131,7 +131,7 @@ class Sandbox:
     p.join(timeout_seconds)
 
     if p.is_alive():
-      print(f"[Sandbox] ⏱️ Timeout atteint ({timeout_seconds}s). Arrêt forcé du programme généré.")
+      print(f"[Sandbox] Timeout atteint ({timeout_seconds}s). Arrêt forcé du programme généré.")
 
       p.terminate()
       p.join()

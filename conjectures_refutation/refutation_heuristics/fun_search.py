@@ -1,3 +1,6 @@
+import importlib
+import os
+import sys
 from dataclasses import dataclass
 from operator import invert
 from typing import Optional, Tuple, Callable, Dict, List, Any
@@ -312,14 +315,31 @@ def compute_invariants(G: nx.Graph, np_hard_invariants: bool) -> Dict[str, float
 
     return list_invariants
 
+
 @funsearch.run
-def evaluate(input: dict, np_hard_invariants: bool) -> float:
-    size = input["size"]
-    score_fn = input["score_fn"]
-    min_size = input["min_size"]
-    max_size = input["max_size"]
+def evaluate(input_dict: dict) -> float:
+    size = int(input_dict["size"])
+    min_size = int(input_dict["min_size"])
+    max_size = int(input_dict["max_size"])
+    np_hard_invariants = bool(input_dict["np_hard_invariants"])
+    score_function_path = str(input_dict["score_function_path"])
+    score_function_name = str(input_dict["score_function_name"])
+
+    actual_path = os.path.abspath(score_function_path)
+    module_dir = os.path.dirname(actual_path)
+    module_name = os.path.basename(actual_path)
+
+    if module_name.endswith('.py'):
+        module_name = module_name[:-3]
+
+    if module_dir not in sys.path:
+        sys.path.insert(0, module_dir)
+
+    custom_module = importlib.import_module(module_name)
+    score_fn = getattr(custom_module, score_function_name)
 
     G = solve(size, np_hard_invariants)
+
     score = score_fn(G, min_size, max_size)
 
     return float(-score)
