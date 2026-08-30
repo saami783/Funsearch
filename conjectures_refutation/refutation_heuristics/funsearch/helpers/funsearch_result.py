@@ -40,7 +40,7 @@ class FunSearchResult:
 
 
 def log_result(G, score, total_mutations, total_graphs_generated, min_size, max_size):
-    is_counterexample = (score is not None) and (score > 0)
+    is_counterexample = (score is not None) and (score < 0)
 
     log_data = {
         "has_counterexample": is_counterexample,
