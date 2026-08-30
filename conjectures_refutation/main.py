@@ -12,7 +12,6 @@ from conjectures_refutation.refutation_heuristics.local_search import (
     _derive_seed,
     process_all_conjectures,
 )
-from conjectures_refutation.refutation_heuristics.fun_search import evaluate
 
 
 def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus):
@@ -85,7 +84,7 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
         samples_per_prompt=4
     )
 
-    with open("conjectures_refutation/refutation_heuristics/fun_search.py", "r") as f:
+    with open("conjectures_refutation/refutation_heuristics/specification.py", "r") as f:
         specification_code = f.read()
 
     funsearch.main(specification_code, inputs, config)
