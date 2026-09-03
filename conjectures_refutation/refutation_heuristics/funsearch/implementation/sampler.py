@@ -56,8 +56,7 @@ class LLM:
 
     def __init__(self, samples_per_prompt: int) -> None:
         self._samples_per_prompt = samples_per_prompt
-        # L'adresse de ton wrapper sur le réseau local (à adapter)
-        self._url = 'http://192.168.X.X:11434/api/generate'
+        self._url = 'http://127.0.0.1:8000/api/chat/codex'
 
     def _draw_sample(self, prompt: str) -> str:
         """Appelle l'API du LLM pour générer une complétion."""
