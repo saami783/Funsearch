@@ -79,11 +79,11 @@ class LLM:
                 return clean_code
             else:
                 print(f"[LLM] Code HTTP inattendu : {response.status_code}")
-                return "    return 0.0\n"
+                return "  return 0.0\n"
 
         except Exception as e:
             print(f"[LLM] Erreur de génération : {e}")
-            return "    return 0.0\n"
+            return "  return 0.0\n"
 
     def draw_samples(self, prompt: str) -> Collection[str]:
         """Returns multiple predicted continuations of `prompt`."""
