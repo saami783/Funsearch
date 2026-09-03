@@ -118,7 +118,7 @@ class ProgramsDatabase:
     score = _reduce_score(scores_per_test)
 
     if score > 0:
-      with open("heuristique_contre_exemple.py", "a", encoding="utf-8") as f:
+      with open("out/heuristique_contre_exemple.py", "a", encoding="utf-8") as f:
         f.write(f"\n# ==========================================\n")
         f.write(f"# Contre-exemple trouvé | Score : {-score}\n")
         f.write(f"# ==========================================\n")
