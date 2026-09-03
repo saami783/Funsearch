@@ -73,14 +73,14 @@ def build_result(
         with open("api_requests_count.txt", "r", encoding="utf-8") as f:
             total_api = sum(1 for _ in f)
 
-    best_score = float('-inf')
+    best_score = float('inf')
     best_data = None
 
     if os.path.exists("funsearch_metrics.jsonl"):
         with open("funsearch_metrics.jsonl", "r", encoding="utf-8") as f:
             for line in f:
                 data = json.loads(line.strip())
-                if data["score"] is not None and data["score"] > best_score:
+                if data["score"] is not None and data["score"] < best_score:
                     best_score = data["score"]
                     best_data = data
 
