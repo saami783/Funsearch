@@ -64,7 +64,7 @@ def parse_args() -> argparse.Namespace:
     refutation_with_score_function.add_argument(
         "--time-limit-llm-execution",
         type=int,
-        default=6,
+        default=6*60,
         help=(
             "Temps maximum accordé au code généré par le LLM pour s'exécuter sur un graphe (30 secondes par défaut)."
         )
@@ -258,6 +258,19 @@ def main():
     print(f"Utilisation de la stratégie de recherche {args.strategy}.")
 
     conjectures_refutation_main(**run_params)
+
+    check_and_delete_debug_files()
+
+def check_and_delete_debug_files():
+    import os.path
+
+    txt_file = "api_requests_count.txt"
+    json_file = "funsearch_metrics.jsonl"
+    stats_file = "stats_graphes.txt"
+
+    if os.path.exists(txt_file): os.remove(txt_file)
+    if os.path.exists(json_file): os.remove(json_file)
+    if os.path.exists(stats_file): os.remove(stats_file)
 
 
 def update_identifiers_by_arg(function: str, identifiers_path: Path):
