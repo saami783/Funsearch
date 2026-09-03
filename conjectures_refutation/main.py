@@ -85,8 +85,8 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
             "np_hard_invariants": np_hard_invariants
         })
 
-    from funsearch.implementation import config as config_lib
-    from funsearch.implementation import funsearch
+    from conjectures_refutation.refutation_heuristics.funsearch.implementation import config as config_lib
+    from conjectures_refutation.refutation_heuristics.funsearch.implementation import funsearch
 
     programs_database_config = config_lib.ProgramsDatabaseConfig(
         functions_per_prompt=2,  # k = 2 programmes fusionnés dans le prompt
