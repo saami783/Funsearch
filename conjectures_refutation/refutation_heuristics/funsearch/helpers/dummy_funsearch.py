@@ -1,7 +1,5 @@
-class DummyFunsearch:
-    @staticmethod
-    def run(func): return func
-    @staticmethod
-    def evolve(func): return func
+def run(func): 
+    return func
 
-funsearch = DummyFunsearch()
+def evolve(func): 
+    return func

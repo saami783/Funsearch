@@ -101,6 +101,7 @@ def _sandbox_worker(program: str, function_to_run: str, test_input: Any, return_
     return_dict['success'] = True
 
   except Exception as e:
+    print(f"[DEBUG SANDBOX] Erreur d'exécution: {e}")
     return_dict['result'] = None
     return_dict['success'] = False
 
@@ -190,6 +191,7 @@ class Evaluator:
           and test_output is not None):
         if not isinstance(test_output, (int, float)):
           raise ValueError('@function.run did not return an int/float score.')
-        scores_per_test[current_input] = test_output
+        test_key = current_input["size"]
+        scores_per_test[test_key] = test_output
     if scores_per_test:
       self._database.register_program(new_function, island_id, scores_per_test)
