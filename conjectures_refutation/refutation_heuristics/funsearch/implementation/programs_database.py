@@ -116,6 +116,15 @@ class ProgramsDatabase:
     """Registers `program` in the specified island."""
     self._islands[island_id].register_program(program, scores_per_test)
     score = _reduce_score(scores_per_test)
+
+    if score > 0:
+      with open("heuristique_contre_exemple.py", "a", encoding="utf-8") as f:
+        f.write(f"\n# ==========================================\n")
+        f.write(f"# Contre-exemple trouvé | Score : {-score}\n")
+        f.write(f"# ==========================================\n")
+        f.write(str(program))
+        f.write("\n")
+
     if score > self._best_score_per_island[island_id]:
       self._best_program_per_island[island_id] = program
       self._best_scores_per_test_per_island[island_id] = scores_per_test
