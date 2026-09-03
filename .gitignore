@@ -5,3 +5,4 @@
 .idea
 /conjectures_refutation/.DS_Store
 server.py
+conjectures_refutation/__pycache__
