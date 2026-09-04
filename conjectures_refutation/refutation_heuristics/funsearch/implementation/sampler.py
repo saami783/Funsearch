@@ -119,6 +119,9 @@ class Sampler:
     def sample(self):
         """Continuously gets prompts, samples programs, sends them for analysis."""
         while True:
+            if getattr(self._database, 'stop_run', False):
+                break
+
             if self._end_time is not None and time.time() > self._end_time:
                 print("[Sampler] Temps limite écoulé. Arrêt du programme...")
                 break
