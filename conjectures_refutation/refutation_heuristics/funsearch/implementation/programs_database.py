@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """A programs database that implements the evolutionary algorithm."""
+import os
 from collections.abc import Mapping, Sequence
 import copy
 import dataclasses
@@ -100,6 +101,7 @@ class ProgramsDatabase:
         [None] * config.num_islands)
 
     self._last_reset_time: float = time.time()
+    self.stop_run = False
 
   def get_prompt(self) -> Prompt:
     """Returns a prompt containing implementations from one chosen island."""
@@ -117,13 +119,14 @@ class ProgramsDatabase:
     self._islands[island_id].register_program(program, scores_per_test)
     score = _reduce_score(scores_per_test)
 
-    if score > 0:
-      with open("out/heuristique_contre_exemple.py", "a", encoding="utf-8") as f:
+    if score > 0 and not self.stop_run:
+      with open("out/heuristique_contre_exemple.py", "w", encoding="utf-8") as f:
         f.write(f"\n# ==========================================\n")
         f.write(f"# Contre-exemple trouvé | Score : {-score}\n")
         f.write(f"# ==========================================\n")
         f.write(str(program))
         f.write("\n")
+      self.stop_run = True
 
     if score > self._best_score_per_island[island_id]:
       self._best_program_per_island[island_id] = program
