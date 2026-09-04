@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """Class for sampling new programs."""
+import textwrap
 import time
 from collections.abc import Collection, Sequence
 import requests
@@ -25,30 +26,41 @@ from conjectures_refutation.refutation_heuristics.funsearch.implementation impor
 
 def _trim_preface_of_body(sample: str) -> str:
     """
-    Nettoie la réponse du LLM pour ne garder que le corps de la fonction.
+    Nettoie la réponse du LLM, extrait uniquement le corps,
+    détruit les faux espaces et force l'indentation à 4 espaces normaux.
     """
+    sample = sample.replace('\xa0', ' ')
+
     if "```python" in sample:
         sample = sample.split("```python")[1]
     if "```" in sample:
         sample = sample.split("```")[0]
 
     lines = sample.splitlines()
-    func_body_lineno = 0
-    find_def_declaration = False
+    code_lines = []
+    in_body = False
 
-    for lineno, line in enumerate(lines):
-        if line.strip().startswith('def '):
-            func_body_lineno = lineno
-            find_def_declaration = True
-            break
+    for line in lines:
+        stripped = line.strip()
 
-    if find_def_declaration:
-        code = ''
-        for line in lines[func_body_lineno + 1:]:
-            code += line + '\n'
-        return code
+        if stripped.startswith('def '):
+            in_body = True
+            continue
 
-    return sample
+        if in_body:
+            if stripped.startswith('"""') or stripped.startswith("'''"):
+                continue
+            code_lines.append(line)
+
+    if not in_body:
+        code_lines = lines
+
+    raw_code = '\n'.join(code_lines)
+    dedented_code = textwrap.dedent(raw_code)
+
+    final_code = textwrap.indent(dedented_code, '    ')
+
+    return final_code
 
 
 class LLM:
@@ -56,7 +68,7 @@ class LLM:
 
     def __init__(self, samples_per_prompt: int) -> None:
         self._samples_per_prompt = samples_per_prompt
-        self._url = 'http://127.0.0.1:8000/api/chat/codex'
+        self._url = 'http://192.168.1.13:8000/api/chat/codex'
 
     def _draw_sample(self, prompt: str) -> str:
         """Appelle l'API du LLM pour générer une complétion."""
@@ -67,7 +79,6 @@ class LLM:
         try:
             payload = {
                 "prompt": prompt,
-                "use_local_llm": False,
                 "temperature": 0.8
             }
 
@@ -78,7 +89,7 @@ class LLM:
                 clean_code = _trim_preface_of_body(raw_code)
                 return clean_code
             else:
-                print(f"[LLM] Code HTTP inattendu : {response.status_code}")
+                print(f"[LLM] Code HTTP inattendu : {response.status_code} - {response.text}")
                 return "  return 0.0\n"
 
         except Exception as e:

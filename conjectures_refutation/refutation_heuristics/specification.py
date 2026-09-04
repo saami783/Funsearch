@@ -91,25 +91,25 @@ def solve(size: int, np_hard_invariants: bool, max_steps: int = 500) -> Tuple[nx
 
 @funsearch.evolve
 def priority(G: nx.Graph, current_size: int, invariants: Dict[str, float]) -> float:
-  """
-  Returns a priority score for the given graph `G`.
+    """
+    Returns a priority score for the given graph `G`.
 
-  This function is used to guide a local search algorithm. The goal is to mutate
-  the graph to maximize a mathematical score function and find a counterexample
-  to a graph theory conjecture.
+    This function is used to guide a local search algorithm. The goal is to mutate
+    the graph to maximize a mathematical score function and find a counterexample
+    to a graph theory conjecture.
 
-  Args:
-      G: The current NetworkX graph.
-      current_size: The number of nodes in the graph.
-      invariants: A dictionary containing pre-computed topological properties of the graph.
-          Available keys include: "is_connected", "is_tree", "is_planar", "is_bipartite",
-          "diameter", "radius", "maximum_degree", "average_degree", "density",
-          "matching_number", "largest_eigenvalue", "triangle_number", "girth", etc.
+    Args:
+        G: The current NetworkX graph.
+        current_size: The number of nodes in the graph.
+        invariants: A dictionary containing pre-computed topological properties of the graph.
+            Available keys include: "is_connected", "is_tree", "is_planar", "is_bipartite",
+            "diameter", "radius", "maximum_degree", "average_degree", "density",
+            "matching_number", "largest_eigenvalue", "triangle_number", "girth", etc.
 
-  Return:
-      A float representing the priority or "fitness" of the graph. Higher is better.
-      Combine the values from the `invariants` dictionary using mathematical operations,
-      non-linear combinations, or conditional logic (if/else) to invent a novel heuristic.
-  """
-  return 0
+    Return:
+        A float representing the priority or "fitness" of the graph. Higher is better.
+        Combine the values from the `invariants` dictionary using mathematical operations,
+        non-linear combinations, or conditional logic (if/else) to invent a novel heuristic.
+    """
+    return 0
 
