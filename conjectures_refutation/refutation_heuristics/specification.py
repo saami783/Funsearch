@@ -37,7 +37,10 @@ def evaluate(input_dict: dict) -> float:
 
     G, total_mutations, total_graphs_generated = solve(order, np_hard_invariants, subclass)
 
-    score = score_fn(G, min_order, max_order)
+    if order < min_order or order > max_order:
+        score = None
+    else:
+        score = score_fn(G)
 
     log_result(G, score, total_mutations, total_graphs_generated, min_order, max_order)
 
