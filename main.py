@@ -40,8 +40,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Extraction d'articles scientifiques et réfutation automatique d'objets "
-            "en théorie des graphes."
+            "Programme de réfutation automatique de conjectures en théorie des graphes."
         ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
@@ -58,26 +57,7 @@ def parse_args() -> argparse.Namespace:
     refutation_with_score_function.add_argument(
         "--function",
         help=(
-            "Nom de la fonction de score à charger dans le script fourni via "
-            "--with-score-function."
-        )
-    )
-
-    refutation_with_score_function.add_argument(
-        "--time-limit-llm-execution",
-        type=int,
-        default=6*60,
-        help=(
-            "Temps maximum accordé au code généré par le LLM pour s'exécuter sur un graphe (30 secondes par défaut)."
-        )
-    )
-
-    refutation_with_score_function.add_argument(
-        "--reset-period-island",
-        type=int,
-        default=4 * 60 * 60,
-        help=(
-            "temps au bout duquel FunSearch supprime les mauvaises îles pour relancer l'exploration à partir des meilleures découvertes (4 heures par défaut)."
+            "Nom de la fonction de score à charger dans le script spécifié via --script."
         )
     )
 
@@ -92,6 +72,22 @@ def parse_args() -> argparse.Namespace:
         )
     )
 
+    parser.add_argument(
+        "--strategy",
+        choices=["hill_climbing", "funsearch"],
+        default="hill_climbing",
+        help=(
+            "Stratégie de recherche de contre-exemples : hill climbing ou FunSearch."
+        )
+    )
+
+    parser.add_argument("--min-size", type=int, default=6, help="Nombre minimal de sommets des graphes testés.")
+    parser.add_argument("--max-size", type=int, default=30, help="Nombre maximal de sommets des graphes testés.")
+    parser.add_argument("--time-limit", type=float, default=60.0 * 5, help="Temps maximal alloué à la recherche pour un objet donné, en secondes.")
+    parser.add_argument("--seed", type=int, default=42, help="Graine aléatoire utilisée pour la reproductibilité.")
+
+    # Paramètres FunSearch :
+
     refutation_with_score_function.add_argument(
         "--local-llm",
         action="store_true",
@@ -99,15 +95,6 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Utilisation d'un LLM en local ou via requête API (OpenAI etc...). Ce paramètre permet de faire varier"
             "le nombre de requêtes simultanées envoyées. 2 requêtes pour un LLM en local vs 4 pour un LLM hébergé."
-        )
-    )
-
-    parser.add_argument(
-        "--strategy",
-        choices=["hill_climbing", "funsearch"],
-        default="hill_climbing",
-        help=(
-            "Stratégie de recherche de contre-exemples : hill climbing ou FunSearch."
         )
     )
 
@@ -121,6 +108,24 @@ def parse_args() -> argparse.Namespace:
         )
     )
 
+    refutation_with_score_function.add_argument(
+        "--time-limit-llm-execution",
+        type=int,
+        default=30,
+        help=(
+            "Temps maximum accordé au code généré par le LLM pour s'exécuter sur un graphe (30 secondes par défaut)."
+        )
+    )
+
+    refutation_with_score_function.add_argument(
+        "--reset-period-island",
+        type=int,
+        default=4 * 60 * 60,
+        help=(
+            "Temps au bout duquel FunSearch supprime les mauvaises îles pour relancer l'exploration à partir des meilleures découvertes (4 heures par défaut)."
+        )
+    )
+
     funsearch_group = parser.add_argument_group("Configuration FunSearch")
     funsearch_group.add_argument(
         "--np-hard",
@@ -131,22 +136,6 @@ def parse_args() -> argparse.Namespace:
         )
     )
 
-    funsearch_group.add_argument(
-        "--funsearch-llm-temperature",
-        type=float,
-        default=None,
-        help="Température d'échantillonnage du LLM utilisé par FunSearch."
-    )
-
-    funsearch_group.add_argument(
-        "--funsearch-llm-max-tokens",
-        type=int,
-        default=None,
-        help="Nombre maximal de tokens générés à chaque appel LLM de FunSearch."
-    )
-
-    parser.add_argument("--min-size", type=int, default=6, help="Nombre minimal de sommets des graphes testés.")
-    parser.add_argument("--max-size", type=int, default=30, help="Nombre maximal de sommets des graphes testés.")
     parser.add_argument(
         "--subclass",
         nargs="*",
@@ -160,13 +149,14 @@ def parse_args() -> argparse.Namespace:
             "Le graphe généré pour la recherche sera vide."
         ),
     )
-    parser.add_argument("--time-limit", type=float, default=60.0 * 5, help="Temps maximal alloué à la recherche pour un objet donné, en secondes.")
+
+    # Paramètres Hill Climbing :
+
     parser.add_argument("--neighbors", type=int, default=20, help="Nombre de voisins explorés par itération pour la recherche locale.")
     parser.add_argument("--max-mutations", type=int, default=2, help="Nombre maximal de mutations appliquées pour construire un voisin.")
     parser.add_argument("--stagnation", type=int, default=10, help="Nombre d'itérations sans amélioration avant une réinitialisation.")
     parser.add_argument("--margin", type=float, default=1e-3, help="Marge numérique requise pour accepter un contre-exemple.")
     parser.add_argument("--cache-limit", type=int, default=None, help="Nombre maximal d'évaluations conservées en cache.")
-    parser.add_argument("--seed", type=int, default=42, help="Graine aléatoire utilisée pour la reproductibilité.")
     parser.add_argument("--cpus", type=int, default=max(1, cpu_count() - 0), help="Nombre de processus workers ; <= 1 désactive le multiprocessing.")
 
     parser.add_argument(
