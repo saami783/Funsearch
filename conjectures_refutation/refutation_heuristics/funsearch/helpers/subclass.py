@@ -1,27 +1,40 @@
 import networkx as nx
 
+def build_tree_graph(order: int) -> nx.Graph:
+    return nx.random_labeled_tree(order)
+
+def build_connected_graph(order: int) -> nx.Graph:
+    if order <= 3:
+        raise ValueError(f"L'ordre du graphe doit être supérieur ou égal à 3 pour la génération d'un graphe connexe.")
+    return nx.cycle_graph(order)
+
+def build_planar_graph(order: int):
+    if order < 1:
+        raise ValueError(f"L'ordre du graphe doit être supérieur à 1 pour la génération d'un graphe planaire.")
+    return nx.wheel_graph(order)
+
+def build_bipartite_graph(order: int):
+    if order < 2:
+        raise ValueError(f"L'ordre du graphe doit être supérieur à 2 pour la génération d'un graphe bipartie.")
+    n1 = order // 2
+    n2 = order - n1
+    return nx.complete_bipartite_graph(n1, n2)
+
+def build_claw_free_graph(order: int):
+    if order < 1:
+        raise ValueError(f"L'ordre du graphe doit être supérieur à 1 pour la génération d'un graphe sans griffe.")
+    return nx.complete_graph(order)
 
 subclass_function = {
-    "hamiltonian": build_hamiltonian_graph,
-    "induced_subgraph": build_induced_subgraph,
-    "bull_free": build_bull_free_graph,
-    "paw_free": build_paw_free,
-    "diamond_free": build_diamond_free_graph,
     "connected": build_connected_graph,
     "tree": build_tree_graph,
-    "forest": build_forest_graph,
-    "star": build_star_graph,
-    "path": build_path_graph,
-    "cycle": build_cycle_graph,
-    "chordal": build_chordal_graph,
-    "complete": build_complete_graph,
-    "bipartite": build_bipartite_graph,
     "planar": build_planar_graph,
-    "grid": build_grid_graph,
-    "triangle_free": build_triangle_free_graph,
+    "bipartite": build_bipartite_graph,
     "claw_free": build_claw_free_graph,
-    "c4_free": build_c4_free_graph,
-    "regular": build_regular_graph,
+    # "forest": build_forest_graph,
+    # "star": build_star_graph,
+    # "diamond_free": build_diamond_free_graph,
+    # "regular": build_regular_graph,
 }
 
 def build_graph(subclass: str, n: int) -> nx.Graph:
