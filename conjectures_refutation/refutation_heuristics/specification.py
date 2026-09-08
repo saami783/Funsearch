@@ -14,10 +14,10 @@ from conjectures_refutation.refutation_heuristics.funsearch.helpers.subclass imp
 
 @funsearch.run
 def evaluate(input_dict: dict) -> float:
-    size = int(input_dict["size"])
-    min_size = int(input_dict["min_size"])
+    order = int(input_dict["order"])
+    min_order = int(input_dict["min_order"])
     subclass = int(input_dict["subclass"])
-    max_size = int(input_dict["max_size"])
+    max_order = int(input_dict["max_order"])
     np_hard_invariants = bool(input_dict["np_hard_invariants"])
     score_function_path = str(input_dict["score_function_path"])
     score_function_name = str(input_dict["score_function_name"])
@@ -35,11 +35,11 @@ def evaluate(input_dict: dict) -> float:
     custom_module = importlib.import_module(module_name)
     score_fn = getattr(custom_module, score_function_name)
 
-    G, total_mutations, total_graphs_generated = solve(size, np_hard_invariants, subclass)
+    G, total_mutations, total_graphs_generated = solve(order, np_hard_invariants, subclass)
 
-    score = score_fn(G, min_size, max_size)
+    score = score_fn(G, min_order, max_order)
 
-    log_result(G, score, total_mutations, total_graphs_generated, min_size, max_size)
+    log_result(G, score, total_mutations, total_graphs_generated, min_order, max_order)
 
     if score is None:
         return -10000.0
@@ -98,7 +98,7 @@ def solve(order: int, np_hard_invariants: bool, subclass: str|None = None, max_s
 
 
 @funsearch.evolve
-def priority(G: nx.Graph, current_size: int, invariants: Dict[str, float]) -> float:
+def priority(G: nx.Graph, current_order: int, invariants: Dict[str, float]) -> float:
     """
     Returns a priority score for the given graph `G`.
 
@@ -108,7 +108,7 @@ def priority(G: nx.Graph, current_size: int, invariants: Dict[str, float]) -> fl
 
     Args:
         G: The current NetworkX graph.
-        current_size: The number of nodes in the graph.
+        current_order: The number of nodes in the graph.
         invariants: A dictionary containing pre-computed topological properties of the graph.
             Available keys include: "is_connected", "is_tree", "is_planar", "is_bipartite",
             "diameter", "radius", "maximum_degree", "average_degree", "density",
