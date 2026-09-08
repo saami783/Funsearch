@@ -9,12 +9,14 @@ from conjectures_refutation.refutation_heuristics.funsearch.helpers import dummy
 from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_invariants import compute_invariants
 from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_result import log_result
 from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_mutations import MUTATION_REGISTRY
+from conjectures_refutation.refutation_heuristics.funsearch.helpers.subclass import build_graph
 
 
 @funsearch.run
 def evaluate(input_dict: dict) -> float:
     size = int(input_dict["size"])
     min_size = int(input_dict["min_size"])
+    subclass = int(input_dict["subclass"])
     max_size = int(input_dict["max_size"])
     np_hard_invariants = bool(input_dict["np_hard_invariants"])
     score_function_path = str(input_dict["score_function_path"])
@@ -33,7 +35,7 @@ def evaluate(input_dict: dict) -> float:
     custom_module = importlib.import_module(module_name)
     score_fn = getattr(custom_module, score_function_name)
 
-    G, total_mutations, total_graphs_generated = solve(size, np_hard_invariants)
+    G, total_mutations, total_graphs_generated = solve(size, np_hard_invariants, subclass)
 
     score = score_fn(G, min_size, max_size)
 
@@ -45,8 +47,14 @@ def evaluate(input_dict: dict) -> float:
     return float(-score)
 
 
-def solve(size: int, np_hard_invariants: bool, max_steps: int = 500) -> Tuple[nx.Graph, int, int]:
-    G: nx.Graph = nx.empty_graph(size)
+def solve(order: int, np_hard_invariants: bool, subclass: str|None = None, max_steps: int = 500) -> Tuple[nx.Graph, int, int]:
+    G: nx.Graph
+
+    if subclass is None:
+        G = nx.empty_graph(order)
+    else:
+        G = build_graph(subclass, order)
+
     step = 0
 
     total_mutations = 0
@@ -65,7 +73,7 @@ def solve(size: int, np_hard_invariants: bool, max_steps: int = 500) -> Tuple[nx
 
                 invariants = compute_invariants(G_temp, np_hard_invariants)
 
-                p = priority(G_temp, size, invariants)
+                p = priority(G_temp, order, invariants)
 
                 priorities.append(p)
                 candidate_graphs.append(G_temp)

@@ -78,6 +78,7 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
     for n in range(min_size, max_size):
         inputs.append({
             "size": n,
+            "subclass": subclass,
             "min_size": min_size,
             "max_size": max_size,
             "score_function_path": score_function_path,
