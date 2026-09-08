@@ -1,4 +1,4 @@
-def conjecture_1_53(G, min_size, max_size):
+def conjecture_52(G, min_size, max_size):
     import networkx as nx
     from conjectures_refutation.helpers import invariants as inv
 
@@ -6,11 +6,9 @@ def conjecture_1_53(G, min_size, max_size):
     if n < min_size or n > max_size:
         return None
 
-    avg = inv.average_degree(G)
+    A = inv.maximum_degree(G)
     alpha = inv.independence_number(G)
-
-    A = avg
-    B = (17.0 / 7.0) + (81.0 / 56.0) * alpha - (21.0 / 94.0) * (alpha ** 2) + (1.0 / 100.0) * (alpha ** 3)
+    B = -257.0 / 63.0 + (535.0 / 63.0) * alpha - (94.0 / 63.0) * (alpha ** 2) + (5.0 / 63.0) * (alpha ** 3)
 
     if not inv.is_planar(G):
         return float(abs(B - A) + 1.0)
