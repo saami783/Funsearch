@@ -1,4 +1,4 @@
-def conjecture_45(G, min_size, max_size): 
+def conjecture_45(G): 
    import networkx as nx
    from conjectures_refutation.helpers import invariants as inv
    ...
