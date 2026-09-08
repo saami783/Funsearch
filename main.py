@@ -7,6 +7,8 @@ from typing import Tuple
 
 import ssl
 
+from conjectures_refutation.refutation_heuristics.funsearch.helpers.subclass import subclass_function
+
 _DEFAULT_MUTATION_NAMES_FALLBACK: Tuple[str, ...] = (
     "add_edge",
     "remove_edge",
@@ -147,12 +149,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-size", type=int, default=30, help="Nombre maximal de sommets des graphes testés.")
     parser.add_argument(
         "--subclass",
-        default="",
+        nargs="*",
+        default=[],
+        choices=list(subclass_function.keys()),
         help=(
             "Sous-classe de graphes ciblée par la conjecture, "
-            "ex. 'planar', 'connected,claw_free', 'bipartite'. "
-            "Sépare plusieurs prédicats par des virgules. "
-            "Si vide, aucune restriction de sous-classe n'est appliquée."
+            "ex. 'planar', 'connected, claw_free', 'bipartite'. "
+            # "Accepte un tableau de sous-classe [planar, connected]"
+            "Si vide, aucune restriction de sous-classe n'est appliquée. "
+            "Le graphe généré pour la recherche sera vide."
         ),
     )
     parser.add_argument("--time-limit", type=float, default=60.0 * 5, help="Temps maximal alloué à la recherche pour un objet donné, en secondes.")
