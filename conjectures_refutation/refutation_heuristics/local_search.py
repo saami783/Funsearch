@@ -20,7 +20,6 @@ from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Sequence, Tuple
-import pandas as pd
 import networkx as nx
 from matplotlib import pyplot as plt
 
@@ -51,9 +50,9 @@ from conjectures_refutation.helpers.utility import (
     mutation_replace_vertex_by_clique,
     mutation_replace_vertex_by_polyhedral,
     mutation_bipartition_neighborhood,
-    ConjectureResult, MutationFunction, MUTATION_REGISTRY,
+    ConjectureResult, MutationFunction, MUTATION_REGISTRY, DEFAULT_MUTATION_NAMES,
 )
-from conjectures_refutation.helpers import invariants, scores_function
+from conjectures_refutation.helpers import invariants
 
 ConjectureMapping = Dict[str, Any]
 CacheValue = Tuple[Optional[float], Optional[float], float]
@@ -179,7 +178,6 @@ def write_summary_txt(
     base_seed: Optional[int],
     context_seeds: Sequence[Tuple[str, Optional[int]]],
     total_contexts: int,
-    excel_path: Optional[str] = None,
 ) -> None:
     lines: list[str] = []
     lines.append("Local Search Experiment Summary")
@@ -233,136 +231,6 @@ def write_summary_txt(
     with path.open("w", encoding="utf-8") as handle:
         handle.write("\n".join(lines).strip() + "\n")
 
-    update_summary_excel(
-        excel_path,
-        outcomes,
-        params,
-        cpus,
-        base_seed,
-        context_seeds,
-        total_contexts,
-    )
-
-def update_summary_excel(
-    excel_path: Optional[str],
-    outcomes: Sequence[SearchOutcome],
-    params: SearchParameters,
-    cpus: int,
-    base_seed: Optional[int],
-    context_seeds: Sequence[Tuple[str, Optional[int]]],
-    total_contexts: int,
-) -> None:
-    """Update the matching Excel sheet for each outcome."""
-
-    if not excel_path:
-        return
-
-    workbook_path = Path(excel_path)
-    if not workbook_path.exists():
-        print(f"Excel file not found: {workbook_path}")
-        return
-
-    object_columns = [
-        "Graph order",
-        "Seed",
-        "Context seeds",
-        "Mutations",
-        "Counterexamples found",
-        "Is_refuted",
-        "Graph6",
-    ]
-    mutation_names = params.mutation_names or DEFAULT_MUTATION_NAMES
-    mutations_value = ", ".join(mutation_names)
-    graph_order_value = f"[{params.min_size}, {params.max_size}]"
-    seed_value = base_seed if base_seed is not None else "random"
-    context_seed_map = {
-        identifier: seed if seed is not None else "random"
-        for identifier, seed in context_seeds
-    }
-    success_count = sum(outcome.found_counterexample for outcome in outcomes)
-    counterexamples_found_value = f"{success_count}/{total_contexts}"
-    sheets: Dict[str, pd.DataFrame] = {}
-
-    for outcome in outcomes:
-        identifier = outcome.conjecture_id
-        target = _resolve_excel_target(identifier)
-        if target is None:
-            print(f"Invalid identifier: {identifier}")
-            continue
-
-        sheet_name, id_column, article_id, object_id = target
-
-        if sheet_name not in sheets:
-            df = pd.read_excel(workbook_path, sheet_name=sheet_name, header=0)
-            for column in object_columns:
-                if column in df.columns:
-                    df[column] = df[column].astype("object")
-            sheets[sheet_name] = df
-
-        df = sheets[sheet_name]
-        article_ids = pd.to_numeric(df["Article_id"], errors="coerce")
-        object_ids = pd.to_numeric(df[id_column], errors="coerce")
-
-        mask = (article_ids == article_id) & (object_ids == object_id)
-        if not mask.any():
-            print(
-                "No matching Excel row found for "
-                f"sheet={sheet_name}, Article_id={article_id}, {id_column}={object_id}"
-            )
-            continue
-
-        row_index = df.index[mask][0]
-        evaluation = outcome.best_evaluation
-        df.loc[row_index, "Time limit"] = params.time_limit
-        df.loc[row_index, "Graph order"] = graph_order_value
-        df.loc[row_index, "Neighbours"] = params.neighbor_count
-        df.loc[row_index, "Max mutations"] = params.max_mutations
-        df.loc[row_index, "Stagnation cap"] = params.stagnation_limit
-        df.loc[row_index, "Margin"] = params.margin
-        df.loc[row_index, "CPUs"] = cpus
-        df.loc[row_index, "Seed"] = seed_value
-        df.loc[row_index, "Context seeds"] = (
-            f"{identifier}:{context_seed_map.get(identifier, 'random')}"
-        )
-        df.loc[row_index, "Mutations"] = mutations_value
-        df.loc[row_index, "Counterexamples found"] = counterexamples_found_value
-        df.loc[row_index, "Is_refuted"] = outcome.found_counterexample
-        df.loc[row_index, "Score"] = evaluation.score
-        df.loc[row_index, "Time (s)"] = outcome.elapsed
-        df.loc[row_index, "Evaluated"] = outcome.evaluations_total
-        df.loc[row_index, "Eligible"] = outcome.evaluations_eligible
-        df.loc[row_index, "Resets"] = outcome.resets
-        df.loc[row_index, "Graph6"] = evaluation.graph6
-
-    with pd.ExcelWriter(
-        workbook_path,
-        engine="openpyxl",
-        mode="a",
-        if_sheet_exists="replace",
-    ) as writer:
-        for sheet_name, df in sheets.items():
-            df.to_excel(writer, sheet_name=sheet_name, index=False)
-
-
-def _resolve_excel_target(identifier: str) -> Optional[Tuple[str, str, int, int]]:
-    sheet_mapping = {
-        "conjecture": ("Conjectures", "Conjecture_id"),
-        "proposition": ("Propositions", "Proposition_id"),
-        "theorem": ("Theorems", "Theorem_id"),
-        "lemma": ("Lemmes", "Lemma_id"),
-    }
-
-    parts = identifier.split("_")
-    if len(parts) != 3:
-        return None
-
-    object_type, article_id, object_id = parts
-    sheet_info = sheet_mapping.get(object_type.lower())
-    if sheet_info is None:
-        return None
-
-    sheet_name, id_column = sheet_info
-    return sheet_name, id_column, int(article_id), int(object_id)
 
 def _maybe_log_outcome(outcome: SearchOutcome, verbose: bool) -> None:
     if not verbose:
@@ -707,8 +575,7 @@ def process_all_conjectures(
             effective_cpus,
             config.seed,
             context_seed_pairs,
-            len(conjectures),
-            config.excel_path,
+            len(conjectures)
         )
 
         if config.verbose:
