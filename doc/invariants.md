@@ -1,6 +1,6 @@
 ## Invariants calculés par défaut
 
-Les invariants sont à définir dans [funsearch_invariants.py](./conjectures_refutation/refutation_heuristics/funsearch/helpers/funsearch_invariants.py). 
+Les invariants sont à définir dans [funsearch_invariants.py](../conjectures_refutation/refutation_heuristics/funsearch/helpers/funsearch_invariants.py). 
 
 | Invariant                           | Description                                            |
 |:------------------------------------|:-------------------------------------------------------|

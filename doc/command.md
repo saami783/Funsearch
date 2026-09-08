@@ -25,8 +25,8 @@ Ces paramètres nécessitent d'avoir défini au préalable les paramètres suiva
 | **`--llm`** | LLM utilisé par FunSearch : (à définir et à implémenter).                                                 |
 | **`--time-limit-llm-execution`** | Temps maximum accordé au code généré par le LLM pour s'exécuter sur un graphe : 30 secondes par défaut. |
 | **`--reset-period-island`** | Temps au bout duquel FunSearch supprime les mauvaises îles pour relancer l'exploration à partir des meilleures découvertes : 4 heures par défaut.                                                 |
-| **`--np-hard`** | Calculs d'une liste d'invariants NP-difficiles pour guider le LLM. La liste des invariants NP-Difficiles est [disponible ici](./invariants.md).|                              |
-| **`--subclass`** | Sous-classe de graphes ciblée par la conjecture. Si vide, aucune restriction de sous-classe n'est appliquée, le programme partira d'un graphe vide et apprendra la structure du graphe à construire. Les familles de graphes sont à définir dans [subclass.py](./conjectures_refutation/refutation_heuristics/funsearch/helpers/subclass.py).                 |
+| **`--np-hard`** | Calculs d'une liste d'invariants NP-difficiles pour guider le LLM. La liste des invariants NP-Difficiles est [disponible ici](invariants.md).|                              |
+| **`--subclass`** | Sous-classe de graphes ciblée par la conjecture. Si vide, aucune restriction de sous-classe n'est appliquée, le programme partira d'un graphe vide et apprendra la structure du graphe à construire. Les familles de graphes sont à définir dans [subclass.py](../conjectures_refutation/refutation_heuristics/funsearch/helpers/subclass.py).                 |
 
 ## Paramètres liés au Hill Climbing :
 
@@ -38,4 +38,4 @@ Ces paramètres nécessitent d'avoir défini au préalable les paramètres suiva
 | **`--margin`** | Marge numérique requise pour accepter un contre-exemple : 1e-3 par défaut.                                                 |
 | **`--cache-limit`** | Nombre maximal d'évaluations conservées en cache : None par défaut.                              |
 | **`--cpus`** | Nombre de processus workers ; <= 1 désactive le multiprocessing : le nombre de cpus de la machine - 1 par défaut.                    |
-| **`--mutations`** | Opérateurs de mutation autorisés pendant la recherche. [Voir la liste par défaut](./mutations.md). Les opérateurs sont à définir dans [funsearch_mutations.py](./conjectures_refutation/refutation_heuristics/funsearch/helpers/funsearch_mutations.py).                       |
+| **`--mutations`** | Opérateurs de mutation autorisés pendant la recherche. [Voir la liste par défaut](mutations.md). Les opérateurs sont à définir dans [funsearch_mutations.py](../conjectures_refutation/refutation_heuristics/funsearch/helpers/funsearch_mutations.py).                       |
