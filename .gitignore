@@ -4,5 +4,6 @@
 .DS_Store
 .idea
 /conjectures_refutation/.DS_Store
-server.py
+server_codex.py
+server_ollama.py
 conjectures_refutation/__pycache__
