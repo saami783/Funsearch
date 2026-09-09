@@ -199,7 +199,7 @@ class Evaluator:
           and test_output is not None):
         if not isinstance(test_output, (int, float)):
           raise ValueError('@function.run did not return an int/float score.')
-        test_key = current_input["size"]
+        test_key = current_input["order"]
         scores_per_test[test_key] = test_output
     if scores_per_test:
       self._database.register_program(new_function, island_id, scores_per_test)

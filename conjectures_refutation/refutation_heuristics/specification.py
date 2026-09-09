@@ -16,7 +16,7 @@ from conjectures_refutation.refutation_heuristics.funsearch.helpers.subclass imp
 def evaluate(input_dict: dict) -> float:
     order = int(input_dict["order"])
     min_order = int(input_dict["min_order"])
-    subclass = int(input_dict["subclass"])
+    subclass = input_dict["subclass"]
     max_order = int(input_dict["max_order"])
     np_hard_invariants = bool(input_dict["np_hard_invariants"])
     score_function_path = str(input_dict["score_function_path"])

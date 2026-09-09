@@ -17,12 +17,12 @@ from conjectures_refutation.refutation_heuristics.local_search import (
 from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_result import build_result, create_log_file
 
 
-def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus):
+def load_hill_climbling(min_order, max_order, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus):
 
     print("Initialisation des paramètres de recherche...")
     params = SearchParameters(
-        min_size=min_size,
-        max_size=max_size,
+        min_size=min_order,
+        max_size=max_order,
         neighbor_count=neighbors,
         max_mutations=max_mutations,
         time_limit=time_limit,
@@ -43,7 +43,7 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
         time_limit=params.time_limit,
         stagnation_limit=params.stagnation_limit,
         margin=params.margin,
-        cache_size_limit=getattr(params, "cache_size_limit", None),
+        cache_size_limit=getattr(params, "cache_order_limit", None),
         mutation_names=params.mutation_names or None,
         verbose=params.verbose,
         seed=params.seed
@@ -64,7 +64,7 @@ def load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit
         context_seed_pairs=context_seed_pairs
     )
 
-def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score_function_path: str,
+def load_funsearch(min_order: int, max_order: int, np_hard_invariants: bool, score_function_path: str,
                    score_function_name: str, use_local_llm: bool, subclass: str|None, evaluate_time_limit: int,
                    reset_period_island: int, time_limit: float, cpus: int, approx: bool):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
@@ -75,12 +75,12 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
         os.remove("funsearch_metrics.jsonl")
 
     inputs = []
-    for n in range(min_size, max_size):
+    for n in range(min_order, max_order):
         inputs.append({
-            "size": n,
+            "order": n,
             "subclass": subclass,
-            "min_size": min_size,
-            "max_size": max_size,
+            "min_order": min_order,
+            "max_order": max_order,
             "score_function_path": score_function_path,
             "score_function_name": score_function_name,
             "np_hard_invariants": np_hard_invariants
@@ -151,7 +151,7 @@ def load_funsearch(min_size: int, max_size: int, np_hard_invariants: bool, score
     print(f"[BILAN] Requêtes API totales: {final_result.total_api_requests}")
 
 
-def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
+def main(min_order: int, max_order: int, time_limit: float, neighbors: int,
          max_mutations: int, stagnation: int, margin: float,
          seed: int, mutation_names: tuple[str, ...], cpus: int,
          score_function_path: str, score_function_name: str,
@@ -200,7 +200,7 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
         if approx:
             approx_fn = getattr(custom_module, "approx", None)
             if approx_fn is None or not callable(approx_fn):
-                raise AttributeError(f"--approx demandé mais aucune fonction 'approx(G, min_size, max_size) n'existe dans '{actual_path}'.")
+                raise AttributeError(f"--approx demandé mais aucune fonction 'approx(G, min_order, max_order) n'existe dans '{actual_path}'.")
 
             print(f"Recherche approchée activée. Si un graphe candidat obtient un score négatif alors '{score_function_name}' sera appelée sur le candidat.")
 
@@ -216,9 +216,9 @@ def main(min_size: int, max_size: int, time_limit: float, neighbors: int,
         continue
 
     if research_strategy == "hill_climbing":
-        load_hill_climbling(min_size, max_size, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
+        load_hill_climbling(min_order, max_order, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
     else:
-        load_funsearch(min_size, max_size, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass, evaluate_time_limit, reset_period_island, time_limit, cpus, approx)
+        load_funsearch(min_order, max_order, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass, evaluate_time_limit, reset_period_island, time_limit, cpus, approx)
 
 
 def _load_identifiers(path: Path) -> List[str]:

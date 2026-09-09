@@ -138,8 +138,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--subclass",
-        nargs="*",
-        default=[],
+        default=None,
         choices=list(subclass_function.keys()),
         help=(
             "Sous-classe de graphes ciblée par la conjecture, "
@@ -228,8 +227,8 @@ def main():
     update_identifiers_by_arg(args.function, identifiers_path)
 
     run_params = {
-        "min_size": args.min_size,
-        "max_size": args.max_size,
+        "min_order": args.min_size,
+        "max_order": args.max_size,
         "time_limit": args.time_limit,
         "neighbors": args.neighbors,
         "max_mutations": args.max_mutations,
