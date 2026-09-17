@@ -68,7 +68,8 @@ class LLM:
 
     def __init__(self, samples_per_prompt: int) -> None:
         self._samples_per_prompt = samples_per_prompt
-        self._url = 'http://192.168.1.13:8000/api/chat/codex'
+        # self._url = 'http://192.168.1.13:8000/api/chat/codex'
+        self._url = 'http://127.0.0.1:8000/api/chat/codex'
 
     def _draw_sample(self, prompt: str) -> str:
         """Appelle l'API du LLM pour générer une complétion."""
@@ -82,7 +83,7 @@ class LLM:
                 "temperature": 0.8
             }
 
-            response = requests.post(self._url, json=payload, timeout=60.0)
+            response = requests.post(self._url, json=payload, timeout=300.0)
 
             if response.status_code == 200:
                 raw_code = response.json().get("response", "")
