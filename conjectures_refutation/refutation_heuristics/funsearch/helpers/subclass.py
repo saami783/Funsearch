@@ -4,16 +4,19 @@ def build_tree_graph(order: int) -> nx.Graph:
     return nx.random_labeled_tree(order)
 
 def build_connected_graph(order: int) -> nx.Graph:
+    print("[DEBUG] génération d'un graphe connecté...")
     if order <= 3:
         raise ValueError(f"L'ordre du graphe doit être supérieur ou égal à 3 pour la génération d'un graphe connexe.")
     return nx.cycle_graph(order)
 
 def build_planar_graph(order: int):
+    print("[DEBUG] génération d'un graphe planaire...")
     if order < 1:
         raise ValueError(f"L'ordre du graphe doit être supérieur à 1 pour la génération d'un graphe planaire.")
     return nx.wheel_graph(order)
 
 def build_bipartite_graph(order: int):
+    print("[DEBUG] génération d'un graphe biparti...")
     if order < 2:
         raise ValueError(f"L'ordre du graphe doit être supérieur à 2 pour la génération d'un graphe bipartie.")
     n1 = order // 2
@@ -21,6 +24,7 @@ def build_bipartite_graph(order: int):
     return nx.complete_bipartite_graph(n1, n2)
 
 def build_claw_free_graph(order: int):
+    print("[DEBUG] génération d'un graphe sans griffe...")
     if order < 1:
         raise ValueError(f"L'ordre du graphe doit être supérieur à 1 pour la génération d'un graphe sans griffe.")
     return nx.complete_graph(order)
