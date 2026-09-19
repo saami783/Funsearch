@@ -17,6 +17,7 @@ class FunSearchResult:
     min_order: int|None
     max_order: int|None
     total_mutations: int|None
+    total_mutations_of_counterexample: int|None
     score: float|None
     total_graphs_generated: int | None
     time: float|None
@@ -39,7 +40,7 @@ class FunSearchResult:
     y_value: Optional[float]|None
 
 
-def log_result(G, score, total_mutations, total_graphs_generated, min_order, max_order):
+def log_result(G, score, total_mutations, total_graphs_generated, min_order, max_order, order):
     is_counterexample = (score is not None) and (score < 0)
 
     log_data = {
@@ -50,7 +51,8 @@ def log_result(G, score, total_mutations, total_graphs_generated, min_order, max
         "total_mutations": total_mutations,
         "score": score,
         "min_order": min_order,
-        "max_order": max_order
+        "max_order": max_order,
+        "current_order": order
     }
 
     with open("funsearch_metrics.jsonl", "a", encoding="utf-8") as f:
@@ -67,11 +69,6 @@ def build_result(
         evaluate_time_limit,
         reset_period_island,
         time_limit,
-        min_order,
-        max_order,
-        total_mutations,
-        score,
-        graphs_generated,
         execution_time: Optional[float] = None,
         x_val: Optional[float] = None,
         y_val: Optional[float] = None,
@@ -79,7 +76,6 @@ def build_result(
         llm_provider: Optional[str] = None,
         llm_temperature: Optional[str] = None,
         subclass: Optional[str] = None,
-
 ) -> FunSearchResult:
     total_api = 0
     if os.path.exists("api_requests_count.txt"):
@@ -89,56 +85,50 @@ def build_result(
     best_score = float('inf')
     best_data = None
 
+    sum_total_mutations = 0
+    sum_total_graphs_generated = 0
+
     if os.path.exists("funsearch_metrics.jsonl"):
         with open("funsearch_metrics.jsonl", "r", encoding="utf-8") as f:
             for line in f:
                 data = json.loads(line.strip())
+
+                sum_total_mutations += data.get("total_mutations", 0)
+                sum_total_graphs_generated += data.get("total_graphs_generated", 0)
+
                 if data["score"] is not None and data["score"] < best_score:
                     best_score = data["score"]
                     best_data = data
 
-    if best_data is None:
-        return FunSearchResult(
-            has_counterexample=False,
-            counterexample_g6=None,
-            size_of_counter_example=None,
-            min_order=min_order,
-            max_order=max_order,
-            total_mutations=total_mutations,
-            score=score,
-            total_graphs_generated=graphs_generated,
-            time=execution_time,
-            total_api_requests=total_api,
-            x_value=x_val,
-            y_value=y_val,
-            seed=seed,
-            funsearch_llm_provider=llm_provider,
-            funsearch_llm_temperature=llm_temperature,
-            subclass=subclass,
-            cpus=cpus,
-            score_function_path=score_function_path,
-            score_function_name=score_function_name,
-            approx=approx,
-            np_hard_invariants=np_hard_invariants,
-            use_local_llm=use_local_llm,
-            evaluate_time_limit=evaluate_time_limit,
-            reset_period_island=reset_period_island,
-            time_limit=time_limit
-        )
+    has_counterexample = (best_score < 0)
+
+    if has_counterexample and best_data is not None:
+        counterexample_g6 = best_data.get("counterexample_g6")
+        size_of_counter_example = best_data.get("size_of_counter_example")
+        total_mutations_of_counterexample = best_data.get("total_mutations")
+        final_x_value = x_val
+        final_y_value = y_val
+    else:
+        counterexample_g6 = None
+        size_of_counter_example = None
+        total_mutations_of_counterexample = None
+        final_x_value = None
+        final_y_value = None
 
     return FunSearchResult(
-        has_counterexample=best_data["has_counterexample"],
-        counterexample_g6=best_data["counterexample_g6"],
-        size_of_counter_example=best_data["size_of_counter_example"],
-        min_order=best_data["min_order"],
-        max_order=best_data["max_order"],
-        total_mutations=best_data["total_mutations"] if best_data["has_counterexample"] else None,
-        score=best_data["score"],
-        total_graphs_generated=best_data["total_graphs_generated"],
+        has_counterexample=has_counterexample,
+        counterexample_g6=counterexample_g6,
+        size_of_counter_example=size_of_counter_example,
+        min_order=best_data["min_order"] if best_data else None,
+        max_order=best_data["max_order"] if best_data else None,
+        total_mutations=sum_total_mutations,
+        total_mutations_of_counterexample=total_mutations_of_counterexample,
+        score=best_score if best_score != float('inf') else None,
+        total_graphs_generated=sum_total_graphs_generated,
         time=execution_time,
         total_api_requests=total_api,
-        x_value=x_val,
-        y_value=y_val,
+        x_value=final_x_value,
+        y_value=final_y_value,
         seed=seed,
         funsearch_llm_provider=llm_provider,
         funsearch_llm_temperature=llm_temperature,
