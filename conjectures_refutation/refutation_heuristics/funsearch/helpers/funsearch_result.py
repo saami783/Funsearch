@@ -14,9 +14,9 @@ class FunSearchResult:
     has_counterexample: bool
     counterexample_g6: str|None
     size_of_counter_example: int|None
-    min_size: int|None
-    max_size: int|None
-    total_mutations_of_counterexample: int|None
+    min_order: int|None
+    max_order: int|None
+    total_mutations: int|None
     score: float|None
     total_graphs_generated: int | None
     time: float|None
@@ -39,7 +39,7 @@ class FunSearchResult:
     y_value: Optional[float]|None
 
 
-def log_result(G, score, total_mutations, total_graphs_generated, min_size, max_size):
+def log_result(G, score, total_mutations, total_graphs_generated, min_order, max_order):
     is_counterexample = (score is not None) and (score < 0)
 
     log_data = {
@@ -49,8 +49,8 @@ def log_result(G, score, total_mutations, total_graphs_generated, min_size, max_
         "total_graphs_generated": total_graphs_generated,
         "total_mutations": total_mutations,
         "score": score,
-        "min_size": min_size,
-        "max_size": max_size
+        "min_order": min_order,
+        "max_order": max_order
     }
 
     with open("funsearch_metrics.jsonl", "a", encoding="utf-8") as f:
@@ -58,7 +58,20 @@ def log_result(G, score, total_mutations, total_graphs_generated, min_size, max_
 
 
 def build_result(
-        cpus, score_function_path, score_function_name, approx, np_hard_invariants, use_local_llm, evaluate_time_limit, reset_period_island, time_limit,
+        cpus,
+        score_function_path,
+        score_function_name,
+        approx,
+        np_hard_invariants,
+        use_local_llm,
+        evaluate_time_limit,
+        reset_period_island,
+        time_limit,
+        min_order,
+        max_order,
+        total_mutations,
+        score,
+        graphs_generated,
         execution_time: Optional[float] = None,
         x_val: Optional[float] = None,
         y_val: Optional[float] = None,
@@ -89,11 +102,11 @@ def build_result(
             has_counterexample=False,
             counterexample_g6=None,
             size_of_counter_example=None,
-            min_size=None,
-            max_size=None,
-            total_mutations_of_counterexample=None,
-            score=None,
-            total_graphs_generated=None,
+            min_order=min_order,
+            max_order=max_order,
+            total_mutations=total_mutations,
+            score=score,
+            total_graphs_generated=graphs_generated,
             time=execution_time,
             total_api_requests=total_api,
             x_value=x_val,
@@ -117,9 +130,9 @@ def build_result(
         has_counterexample=best_data["has_counterexample"],
         counterexample_g6=best_data["counterexample_g6"],
         size_of_counter_example=best_data["size_of_counter_example"],
-        min_size=best_data["min_size"],
-        max_size=best_data["max_size"],
-        total_mutations_of_counterexample=best_data["total_mutations"] if best_data["has_counterexample"] else None,
+        min_order=best_data["min_order"],
+        max_order=best_data["max_order"],
+        total_mutations=best_data["total_mutations"] if best_data["has_counterexample"] else None,
         score=best_data["score"],
         total_graphs_generated=best_data["total_graphs_generated"],
         time=execution_time,
