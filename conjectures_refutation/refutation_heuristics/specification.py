@@ -42,7 +42,7 @@ def evaluate(input_dict: dict) -> float:
     else:
         score = score_fn(G)
 
-    log_result(G, score, total_mutations, total_graphs_generated, min_order, max_order)
+    log_result(G, score, total_mutations, total_graphs_generated, min_order, max_order, order)
 
     if score is None:
         return -10000.0
@@ -60,6 +60,8 @@ def solve(order: int, np_hard_invariants: bool, subclass: str|None = None, max_s
 
     step = 0
 
+    max_steps = 250
+
     total_mutations = 0
     total_graphs_generated = 1
 
@@ -76,7 +78,7 @@ def solve(order: int, np_hard_invariants: bool, subclass: str|None = None, max_s
 
                 invariants = compute_invariants(G_temp, np_hard_invariants)
 
-                p = priority(G_temp, order, invariants)
+                p = float(priority(G_temp, order, invariants))
 
                 priorities.append(p)
                 candidate_graphs.append(G_temp)
@@ -103,24 +105,24 @@ def solve(order: int, np_hard_invariants: bool, subclass: str|None = None, max_s
 @funsearch.evolve
 def priority(G: nx.Graph, current_order: int, invariants: Dict[str, float]) -> float:
     """
-    Returns a priority score for the given graph `G`.
+        Returns a priority score for the given graph `G`.
+        This function is used to guide a local search algorithm. The goal is to mutate
+        the graph to maximize the following mathematical score function (we want a counterexample where score < 0):
 
-    This function is used to guide a local search algorithm. The goal is to mutate
-    the graph to maximize a mathematical score function and find a counterexample
-    to a graph theory conjecture.
+        # SCORE_FUNCTION
 
-    Args:
-        G: The current NetworkX graph.
-        current_order: The number of nodes in the graph.
-        invariants: A dictionary containing pre-computed topological properties of the graph.
-            Available keys include: "is_connected", "is_tree", "is_planar", "is_bipartite",
-            "diameter", "radius", "maximum_degree", "average_degree", "density",
-            "matching_number", "largest_eigenvalue", "triangle_number", "girth", etc.
+        Args:
+            G: The current NetworkX graph.
+            current_order: The number of nodes in the graph.
+            invariants: A dictionary containing pre-computed topological properties of the graph.
+                Available keys include: "is_connected", "is_tree", "is_planar", "is_bipartite",
+                "diameter", "radius", "maximum_degree", "average_degree", "density",
+                "matching_number", "largest_eigenvalue", "triangle_number", "girth", etc.
 
-    Return:
-        A float representing the priority or "fitness" of the graph. Higher is better.
-        Combine the values from the `invariants` dictionary using mathematical operations,
-        non-linear combinations, or conditional logic (if/else) to invent a novel heuristic.
-    """
+        Return:
+            A float representing the priority or "fitness" of the graph. Higher is better.
+            Combine the values from the `invariants` dictionary using mathematical operations,
+            non-linear combinations, or conditional logic (if/else) to invent a novel heuristic.
+        """
     return 0
 

@@ -15,7 +15,7 @@ from conjectures_refutation.refutation_heuristics.local_search import (
     process_all_conjectures,
 )
 from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_result import build_result, create_log_file
-
+import inspect
 
 def load_hill_climbling(min_order, max_order, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus):
 
@@ -89,6 +89,19 @@ def load_funsearch(min_order: int, max_order: int, np_hard_invariants: bool, sco
     from conjectures_refutation.refutation_heuristics.funsearch.implementation import config as config_lib
     from conjectures_refutation.refutation_heuristics.funsearch.implementation import funsearch
 
+    actual_path = os.path.abspath(score_function_path)
+    module_dir = os.path.dirname(actual_path)
+    module_name = os.path.basename(actual_path)
+    if module_name.endswith('.py'):
+        module_name = module_name[:-3]
+    if module_dir not in sys.path:
+        sys.path.insert(0, module_dir)
+
+    custom_module = importlib.import_module(module_name)
+    score_fn = getattr(custom_module, score_function_name)
+
+    score_fn_source = inspect.getsource(score_fn)
+
     programs_database_config = config_lib.ProgramsDatabaseConfig(
         functions_per_prompt=2,  # k = 2 programmes fusionnés dans le prompt
         num_islands=10,  # 10 îles pour maintenir la diversité
@@ -114,6 +127,8 @@ def load_funsearch(min_order: int, max_order: int, np_hard_invariants: bool, sco
 
     with open("conjectures_refutation/refutation_heuristics/specification.py", "r") as f:
         specification_code = f.read()
+
+    specification_code = specification_code.replace("# SCORE_FUNCTION", score_fn_source)
 
     start_time = time.time()
 
