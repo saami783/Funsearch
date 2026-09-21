@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import List
 
 from conjectures_refutation.helpers.utility import load_conjectures
+from conjectures_refutation.refutation_heuristics.funsearch.helpers.counter_example_database import check_if_db_exists, \
+    create_db
 
 from conjectures_refutation.refutation_heuristics.local_search import (
     SearchConfig,
@@ -66,8 +68,14 @@ def load_hill_climbling(min_order, max_order, neighbors, max_mutations, time_lim
 
 def load_funsearch(min_order: int, max_order: int, np_hard_invariants: bool, score_function_path: str,
                    score_function_name: str, use_local_llm: bool, subclass: str|None, evaluate_time_limit: int,
-                   reset_period_island: int, time_limit: float, cpus: int, approx: bool):
+                   reset_period_island: int, time_limit: float, cpus: int, approx: bool, used_counterexamples_db: bool):
     print("[DEBUG] : Initialisation du pipeline FunSearch...")
+
+
+    if used_counterexamples_db:
+        if not check_if_db_exists():
+            print("[DEBUG] : Création de la base de données de contre-exemples...")
+            create_db()
 
     if os.path.exists("api_requests_count.txt"):
         os.remove("api_requests_count.txt")
@@ -83,7 +91,8 @@ def load_funsearch(min_order: int, max_order: int, np_hard_invariants: bool, sco
             "max_order": max_order,
             "score_function_path": score_function_path,
             "score_function_name": score_function_name,
-            "np_hard_invariants": np_hard_invariants
+            "np_hard_invariants": np_hard_invariants,
+            "used_counterexamples_db": used_counterexamples_db
         })
 
     from conjectures_refutation.refutation_heuristics.funsearch.implementation import config as config_lib
@@ -171,7 +180,8 @@ def main(min_order: int, max_order: int, time_limit: float, neighbors: int,
          seed: int, mutation_names: tuple[str, ...], cpus: int,
          score_function_path: str, score_function_name: str,
          research_strategy: str, use_local_llm: bool, approx: bool,
-         subclass: str | None, np_hard_invariants: bool, evaluate_time_limit: int, reset_period_island: int) -> None:
+         subclass: str | None, np_hard_invariants: bool, evaluate_time_limit: int, reset_period_island: int,
+         used_counterexamples_db: bool) -> None:
 
     output_dir = Path("out")
     identifiers = _load_identifiers(Path("conjectures_refutation/data/identifiers.txt"))
@@ -233,7 +243,7 @@ def main(min_order: int, max_order: int, time_limit: float, neighbors: int,
     if research_strategy == "hill_climbing":
         load_hill_climbling(min_order, max_order, neighbors, max_mutations, time_limit, stagnation, margin, mutation_names, seed, identifiers, selected, output_dir, cpus)
     else:
-        load_funsearch(min_order, max_order, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass, evaluate_time_limit, reset_period_island, time_limit, cpus, approx)
+        load_funsearch(min_order, max_order, np_hard_invariants, score_function_path, score_function_name, use_local_llm, subclass, evaluate_time_limit, reset_period_island, time_limit, cpus, approx, used_counterexamples_db)
 
 
 def _load_identifiers(path: Path) -> List[str]:

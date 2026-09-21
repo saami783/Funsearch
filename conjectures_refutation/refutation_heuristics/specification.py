@@ -6,6 +6,8 @@ import networkx as nx
 import numpy as np
 
 from conjectures_refutation.refutation_heuristics.funsearch.helpers import dummy_funsearch as funsearch
+from conjectures_refutation.refutation_heuristics.funsearch.helpers.counter_example_database import \
+    check_if_counterexample_exists, insert_counterexample
 from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_invariants import compute_invariants
 from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_result import log_result
 from conjectures_refutation.refutation_heuristics.funsearch.helpers.funsearch_mutations import MUTATION_REGISTRY
@@ -21,6 +23,7 @@ def evaluate(input_dict: dict) -> float:
     np_hard_invariants = bool(input_dict["np_hard_invariants"])
     score_function_path = str(input_dict["score_function_path"])
     score_function_name = str(input_dict["score_function_name"])
+    used_counterexamples_db = str(input_dict["used_counterexamples_db"])
 
     actual_path = os.path.abspath(score_function_path)
     module_dir = os.path.dirname(actual_path)
@@ -41,6 +44,14 @@ def evaluate(input_dict: dict) -> float:
         score = None
     else:
         score = score_fn(G)
+
+    if used_counterexamples_db:
+        if score is not None and score < 0:
+            g6_str = nx.to_graph6_bytes(G, header=False).decode('ascii').strip()
+            if check_if_counterexample_exists(g6_str):
+                score = 1e-5
+            else:
+                insert_counterexample(g6_str)
 
     log_result(G, score, total_mutations, total_graphs_generated, min_order, max_order, order)
 
