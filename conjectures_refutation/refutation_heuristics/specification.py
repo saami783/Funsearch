@@ -49,8 +49,10 @@ def evaluate(input_dict: dict) -> float:
         if score is not None and score < 0:
             g6_str = nx.to_graph6_bytes(G, header=False).decode('ascii').strip()
             if check_if_counterexample_exists(g6_str):
+                print(f"Contre-exemple trouvé mais écarté car il s'agit d'un doublon. Graphe g6 : {g6_str}")
                 score = 1e-5
             else:
+                print(f"Contre-exemple unique trouvé ! Insertion dans la base de données... Graphe g6 : {g6_str}")
                 insert_counterexample(g6_str)
 
     log_result(G, score, total_mutations, total_graphs_generated, min_order, max_order, order)
