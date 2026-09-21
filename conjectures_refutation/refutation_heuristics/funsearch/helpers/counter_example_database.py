@@ -36,7 +36,7 @@ def create_db():
 def insert_counterexample(g6: str):
     connexion = sqlite3.connect("counterexamples.db")
     cursor = connexion.cursor()
-    requete = "INSERT INTO graphs (g6_counterexample) VALUES (?)"
+    requete = "INSERT INTO graph (g6_counterexample) VALUES (?)"
     cursor.execute(requete, (g6,))
 
     connexion.commit()
