@@ -149,6 +149,16 @@ def parse_args() -> argparse.Namespace:
         ),
     )
 
+    funsearch_group.add_argument(
+        "--use-db",
+        action="store_true",
+        default=False,
+        help=(
+            "Utilise une base de données de contre-exemples pour forcer FunSearch à trouver des contre-exemples unique"
+            " pour les conjectures."
+        )
+    )
+
     # Paramètres Hill Climbing :
 
     parser.add_argument("--neighbors", type=int, default=20, help="Nombre de voisins explorés par itération pour la recherche locale.")
@@ -245,7 +255,8 @@ def main():
         "np_hard_invariants": args.np_hard,
         "use_local_llm": args.local_llm,
         "evaluate_time_limit": args.time_limit_llm_execution,
-        "reset_period_island": args.reset_period_island
+        "reset_period_island": args.reset_period_island,
+        "used_counterexamples_db": args.use_db
     }
 
     print(f"Exécution du programme de réfutation avec le script python {args.script} pour la fonction de score {args.function}.")
